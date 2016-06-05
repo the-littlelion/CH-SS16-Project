@@ -41,7 +41,6 @@ DWORD WINAPI JoystickCompetitionPro::updateValues(void*) {
 #define JOY_RIGHT  8
 #define JOY_FIRE  16
 
-	printf("DEBUG: updater thread started.");//XXX debug msg
 	BYTE buff[100] = {0};
 	DWORD n = 10;
 	DWORD dwBytesRead;
