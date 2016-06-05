@@ -53,6 +53,7 @@
 #include "Track.h"
 #include "3D Engine.h"
 #include "XBOXCOntroller.h"
+#include "JoystickCompetitionPro.h"//TODO this is a quick and dirty solution - replace it
 
 /*	===== */
 /*	Debug */
@@ -120,6 +121,7 @@ long boostReserve = 0, boostUnit = 0;
 long playerLapNumber;
 
 static CXBOXController P1Controller(1);
+static JoystickCompetitionPro P1Joystick;
 
 
 #if defined(DEBUG) || defined(_DEBUG)
@@ -815,6 +817,35 @@ static void CarControl (DWORD input)
 			if( abs(pad.sThumbLX) > XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE )
 			{
 				(pad.sThumbLX < 0) ? (left = TRUE) : (right = TRUE);
+			}
+		}
+		else if (P1Joystick.isConnected()) {
+			// if no XBox controller, try the CompetitionPro driver
+			// TODO here should be the code for the hapkit as controller
+			const joystate stick = P1Joystick.getState();
+			if(stick.forward)
+			{
+				accelerate = TRUE;
+			}
+
+			if(stick.fire)
+			{
+				boost = TRUE;
+			}
+
+			if(stick.back)
+			{
+				brake = TRUE;	// select brake
+				accelerate = FALSE;
+			}
+
+			if(stick.left)
+			{
+				left = TRUE;
+			}
+			else if (stick.right)
+			{
+				right = TRUE;
 			}
 		}
 	}
