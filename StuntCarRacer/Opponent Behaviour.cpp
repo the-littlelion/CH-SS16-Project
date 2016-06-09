@@ -17,6 +17,7 @@
 #include "Car Behaviour.h"
 #include "Track.h"
 #include "3D Engine.h"
+#include "HapkitController.h"
 
 /*	===== */
 /*	Debug */
@@ -57,6 +58,8 @@ typedef enum
 /*	=========== */
 /*	Global data */
 /*	=========== */
+static HapkitController P1Hapkit;
+
 long opponentsID = NO_OPPONENT;	// 0 to 10
 long opponents_current_piece = 0;	// use as opponents_road_section
 
@@ -1841,6 +1844,7 @@ long d0;
 
 	//HitCarSoundBuffer->SetCurrentPosition(0);
 	HitCarSoundBuffer->Play(NULL,NULL,NULL);	// not looping
+	P1Hapkit.feedbackHitCar();
 
 	cars_collided_delay = 5;
 	return;

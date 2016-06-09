@@ -53,7 +53,14 @@
 #include "Track.h"
 #include "3D Engine.h"
 #include "XBOXCOntroller.h"
+
+// added joystick and hapkit support
+// for joystick support uncomment the define in the next line
+//#define USE_COMPETITION_PRO
+#ifdef USE_COMPETITION_PRO
 #include "JoystickCompetitionPro.h"//TODO this is a quick and dirty solution - replace it
+#endif
+#include "HapkitController.h"
 
 /*	===== */
 /*	Debug */
@@ -97,6 +104,7 @@ extern bool bTestKey;
 /*	=========== */
 /*	Global data */
 /*	=========== */
+extern long player_y_rot_acceleration;//XXX remove
 long player_current_piece = 0;	// use as players_road_section
 long player_current_segment = 0;
 long players_distance_into_section = 0;
@@ -121,7 +129,10 @@ long boostReserve = 0, boostUnit = 0;
 long playerLapNumber;
 
 static CXBOXController P1Controller(1);
+#ifdef USE_COMPETITION_PRO
 static JoystickCompetitionPro P1Joystick;
+#endif
+static HapkitController P1Hapkit;
 
 
 #if defined(DEBUG) || defined(_DEBUG)
@@ -819,9 +830,9 @@ static void CarControl (DWORD input)
 				(pad.sThumbLX < 0) ? (left = TRUE) : (right = TRUE);
 			}
 		}
+#ifdef USE_COMPETITION_PRO
 		else if (P1Joystick.isConnected()) {
 			// if no XBox controller, try the CompetitionPro driver
-			// TODO here should be the code for the hapkit as controller
 			const joystate stick = P1Joystick.getState();
 			if(stick.forward)
 			{
@@ -848,6 +859,37 @@ static void CarControl (DWORD input)
 				right = TRUE;
 			}
 		}
+#endif
+		else if (P1Hapkit.isConnected()) {
+			// if no XBox controller, try the Hapkit controller driver
+			const hapkitState controller = P1Hapkit.getState();
+			if(controller.forward)
+			{
+				accelerate = TRUE;
+			}
+
+			if(controller.fire)
+			{
+				boost = TRUE;
+			}
+
+			if(controller.back)
+			{
+				brake = TRUE;	// select brake
+				accelerate = FALSE;
+			}
+
+			//FIXME edit this part to paddle position
+			if(controller.left)
+			{
+				left = TRUE;
+			}
+			else if (controller.right)
+			{
+				right = TRUE;
+			}
+		}
+
 	}
 
 	left_right_value = 0;
@@ -2208,6 +2250,7 @@ static void CarCollisionDetection (void)
 		{
 		//GroundedSoundBuffer->SetCurrentPosition(0);
 		GroundedSoundBuffer->Play(NULL,NULL,NULL);	// not looping
+		P1Hapkit.feedbackGrounded();
 		grounded_delay = 5;
 		}
 
@@ -3144,6 +3187,17 @@ static void UpdatePlayersRotationSpeed (void)
 
 	acceleration = ((player_z_rotation_acceleration * REDUCTION) >> 8);
 	player_z_rotation_speed += acceleration;
+
+	// take rotation speed as measure for centrifugal acceleration
+	// apply it only if the wheels are touching the track
+	if ((touching_road) && (! on_chains))
+	{
+		P1Hapkit.feedbackCentrifugalAccel(player_y_rotation_speed);
+	}
+	else
+	{
+		P1Hapkit.feedbackCentrifugalAccel(0);
+	}
 	return;
 	}
 
@@ -4026,6 +4080,7 @@ static void DrawDustClouds (void)
 //	OffRoadSoundBuffer->Stop();
 //	OffRoadSoundBuffer->SetCurrentPosition(0);
 	OffRoadSoundBuffer->Play(NULL,NULL,NULL);	// not looping
+	P1Hapkit.feedbackOffroad();
 }
 
 /*	======================================================================================= */
@@ -4070,6 +4125,7 @@ on_an_edge:
 
 //	WreckSoundBuffer->SetCurrentPosition(0);
 	WreckSoundBuffer->Play(NULL,NULL,NULL);	// not looping
+	P1Hapkit.feedbackWreck();
 }
 
 /*	======================================================================================= */
@@ -4114,6 +4170,7 @@ void UpdateDamage (void)
 	// Play smash sound effect
 	//SmashSoundBuffer->SetCurrentPosition(0);
 	SmashSoundBuffer->Play(NULL,NULL,NULL);	// not looping
+	P1Hapkit.feedbackSmash();
 	return;
 
 PlayCreakSound:
@@ -4125,6 +4182,7 @@ PlayCreakSound:
 	CreakSoundBuffer->SetVolume(AmigaVolumeToDirectX(amiga_volume));
 	//CreakSoundBuffer->SetCurrentPosition(0);
 	CreakSoundBuffer->Play(NULL,NULL,NULL);	// not looping
+	P1Hapkit.feedbackCreak();
 	return;
 }
 
