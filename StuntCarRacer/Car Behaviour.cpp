@@ -131,7 +131,7 @@ static CXBOXController P1Controller(1);
 #ifdef USE_COMPETITION_PRO
 static JoystickCompetitionPro P1Joystick;
 #endif
-static HapkitController P1Hapkit;
+HapkitController P1Hapkit;
 
 
 #if defined(DEBUG) || defined(_DEBUG)
@@ -2587,7 +2587,7 @@ static void CalculateXAcceleration (void)
 
 static long y_angle_difference, difference_angle, pos_difference_angle;
 
-
+extern long amount;//XXX
 static void CalculateSteering (void)
 	{
 	// basically affects player_y_angle
@@ -2759,7 +2759,7 @@ static void CalculateSteering (void)
 			CalculateSteeringAcceleration(steering_amount);
 			}
 		}
-
+	amount = (section_steering_amount - 32) * (left_hand_bend ? -1 : 1);//XXX
 	return;
 	}
 

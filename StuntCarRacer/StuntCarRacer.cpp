@@ -18,6 +18,7 @@
 #include "Car Behaviour.h"
 #include "Opponent Behaviour.h"
 #include "Wavefunctions.h"
+#include "HapkitController.h"//XXX
 
 
 //-----------------------------------------------------------------------------
@@ -48,6 +49,9 @@ IDirectSoundBuffer8 *OffRoadSoundBuffer;
 IDirectSoundBuffer8 *EngineSoundBuffers[8];
 
 IDirect3DTexture9 *g_pRoadTexture[NUM_ROAD_TEXTURES];
+long amount;//XXX
+extern double force;
+extern HapkitController P1Hapkit;
 
 
 static long frameGap = DEFAULT_FRAME_GAP;
@@ -1190,7 +1194,8 @@ void RenderText( double fTime )
 			txtHelper.DrawFormattedTextLine( L"Lap: %s   Boost: %d", lapText, boostReserve );
 			txtHelper.DrawFormattedTextLine( L"Opponent Distance: %d", CalculateOpponentsDistance() );
 			txtHelper.SetInsertionPos( 280, pd3dsdBackBuffer->Height-15*2 );
-			txtHelper.DrawFormattedTextLine( L"Speed: %d", CalculateDisplaySpeed() );
+//			txtHelper.DrawFormattedTextLine( L"Speed: %d", CalculateDisplaySpeed() );
+			txtHelper.DrawFormattedTextLine( L"Speed: %d, Amount: %d, Pos: %f(%f)", CalculateDisplaySpeed() , amount, P1Hapkit.getState().paddlePos, force);//XXX
 			txtHelper.DrawFormattedTextLine( L"Damage: %d", new_damage );
 			txtHelper.End();
 

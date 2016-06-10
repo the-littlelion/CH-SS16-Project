@@ -58,7 +58,7 @@ typedef enum
 /*	=========== */
 /*	Global data */
 /*	=========== */
-static HapkitController P1Hapkit;
+extern HapkitController P1Hapkit;
 
 long opponentsID = NO_OPPONENT;	// 0 to 10
 long opponents_current_piece = 0;	// use as opponents_road_section

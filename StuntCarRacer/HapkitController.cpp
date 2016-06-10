@@ -48,6 +48,7 @@ hapkitState HapkitController::getState() {
 	return state;
 }
 
+double force;//XXX
 DWORD WINAPI HapkitController::updateValues(void*) {
 	// bitmasks for the joystate structure
 #define BUTTON_FWD    1
@@ -68,12 +69,16 @@ DWORD WINAPI HapkitController::updateValues(void*) {
 #endif
 		} else {
 			if (dwBytes > 0) {
-				int stateVal = atoi((char*)buff);
+				char* ptr = (char*)buff; // pointer for strtok
+				ptr = strtok(ptr, " ");
+				int stateVal = atoi(ptr);
 				state.forward = stateVal & BUTTON_FWD;
 				state.back    = stateVal & BUTTON_BACK;
 				state.left    = stateVal & BUTTON_LEFT;
 				state.right   = stateVal & BUTTON_RIGHT;
 				state.fire    = stateVal & BUTTON_FIRE;
+				ptr = strtok(NULL, " ");
+				state.paddlePos = atof(ptr);
 			}
 		}
 		// write feedback
@@ -85,7 +90,7 @@ DWORD WINAPI HapkitController::updateValues(void*) {
 		strncpy((char*)buff+n, valString, strlen(valString));
 		n += strlen(valString) + 1;
 		buff[n-1] = '\n';
-
+		force = fbCentrifugalAcc;//XXX
 		fbCentrifugalAcc = 0;//FIXME not implemented properly
 
 		if (fbHitCar) {//FIXME refactoring needed
