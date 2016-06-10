@@ -104,7 +104,6 @@ extern bool bTestKey;
 /*	=========== */
 /*	Global data */
 /*	=========== */
-extern long player_y_rot_acceleration;//XXX remove
 long player_current_piece = 0;	// use as players_road_section
 long player_current_segment = 0;
 long players_distance_into_section = 0;

@@ -14,6 +14,7 @@
  * Define the width of the dead zone between turning left and right.
  */
 #define HAPKIT_CENTER_DEADZONE 10 /*TODO adjust this value*/
+#define HAPKIT_FEEDBACK_TIMEOUT 2000 /* after the feedback hasn't been updated for this time in ticks the feedback values are reset to default */
 
 /**
  * single hard-coded device
@@ -82,7 +83,7 @@ public:
 	 * Require a force feedback to the centrifugal force caused by driving through a curve.
 	 * @param acceleration
 	 */
-	void feedbackCentrifugalAccel(long acceleration);//TODO
+	void feedbackCentrifugalAccel(long acceleration);
 
 	/**
 	 * Feedback request to a car to car collision event.
@@ -117,14 +118,23 @@ public:
 	void feedbackGrounded();
 
 private:
-    static DWORD dwThreadId; ///< The ID of the helper thread.
-    static HANDLE updaterThread; ///< The file handle of the helper thread.
-    static HANDLE mtx; ///< Mutex to access the class in a thread safe mode.
-	static HANDLE device; ///< File handle of the COM-Port.
-	static bool done; ///< Termination flag for the helper thread.
+    static DWORD dwThreadId;      ///< The ID of the helper thread.
+    static HANDLE updaterThread;  ///< The file handle of the helper thread.
+    static HANDLE mtx;            ///< Mutex to access the class in a thread safe mode.
+	static HANDLE device;         ///< File handle of the COM-Port.
+	static bool done;             ///< Termination flag for the helper thread.
 
-	static bool connected; ///< Device connection state.
-	static hapkitState state; ///< State information of the hapkit device
+	static bool connected;        ///< Device connection state.
+	static hapkitState state;     ///< State information of the hapkit device
+
+	static long fbLastUpdate;     ///< Time in ticks, the last continuously sent feedback data were updated
+	static long fbCentrifugalAcc; ///< Request of force-feedback (sign = direction, value = force)
+	static bool fbHitCar;         ///< Trigger Hit Car event
+	static bool fbCreak;          ///< Trigger Creak event
+	static bool fbSmash;          ///< Trigger Smash event
+	static bool fbWreck;          ///< Trigger Wreck event
+	static bool fbOffroad;        ///< Trigger Off Road event
+	static bool fbGrounded;       ///< Trigger Grounded event
 
 	/**
 	 * Counter to hold the number of object instances.
