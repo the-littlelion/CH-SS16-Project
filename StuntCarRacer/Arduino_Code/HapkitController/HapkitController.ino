@@ -164,7 +164,9 @@ void loop() {
     dir = !dir;
     digitalWrite(dirPin, dir);
 	
-	Serial.println(readJoystick()); // return joystick state
+	Serial.print(readJoystick()); // return joystick state
+    Serial.print(" ");
+    Serial.println(xh);
   }
   
 }
@@ -184,7 +186,9 @@ void serialEvent() {
   //TODO the reading and decoding goes here
 
   if (fbEvent.startsWith("Centrifugal")) {
-	//TODO read value and rendering
+	force = atoi(fbEvent.substring(12).c_str());
+    //Serial.print("force: ");
+    //Serial.println(force);
   } else if (fbEvent.startsWith("HitCar")) {
 	//TODO rendering
   } else if (fbEvent.startsWith("Creak")) {

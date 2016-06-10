@@ -122,19 +122,19 @@ void readPosCount() {
 void calPosMeter()
 {
   double rh = 65.659;   //[mm]
-  double ts = -.0107 * updatedPos + 4.9513; // Compute the angle of the sector pulley (ts) in degrees based on updatedPos
+  double ts = -.0107 * updatedPos + 7.9513; // Compute the angle of the sector pulley (ts) in degrees based on updatedPos
   xh = rh * (ts * 3.14159 / 180); // Compute the position of the handle based on ts
   vh = -(.95 * .95) * lastLastVh + 2 * .95 * lastVh + (1 - .95) * (1 - .95) * (xh - lastXh) / .0001; // filtered velocity (2nd-order filter)
   lastXh = xh;
   lastLastVh = lastVh;
   lastVh = vh;
   
-//  Serial.println(vh);
+  //Serial.println(xh);
 }
 
 // read joystick state
-byte readJoystick() {
-	byte result = 0;
+uint8_t readJoystick() {
+	uint8_t result = 0;
 	digitalRead(joyFwdPin) == LOW ? result += 1 : 0;
 	digitalRead(joyBackPin) == LOW ? result += 2 : 0;
 	digitalRead(joyLeftPin) == LOW ? result += 4 : 0;
@@ -154,11 +154,10 @@ void loop() {
   calPosMeter();
 
   if(millis() > nextcall) {
-    nextcall += 200;
-    analogWrite(pwmPin, 100);
-    dir = !dir;
-    digitalWrite(dirPin, dir);
-	
+    nextcall += 50;
+
+	Serial.print(xh);
+    Serial.print("\t");
 	Serial.println(readJoystick()); // return joystick state
   }
   
