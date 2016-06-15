@@ -33,8 +33,8 @@
 typedef struct _hapkitState {
 	bool forward;
 	bool back;
-	bool left;//XXX remove direction
-	bool right;//XXX remove direction
+	bool left;//XXX remove direction?
+	bool right;//XXX remove direction?
 	bool fire;
 	double paddlePos;
 } hapkitState;

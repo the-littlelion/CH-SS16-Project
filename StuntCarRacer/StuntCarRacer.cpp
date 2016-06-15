@@ -18,7 +18,7 @@
 #include "Car Behaviour.h"
 #include "Opponent Behaviour.h"
 #include "Wavefunctions.h"
-#include "HapkitController.h"//XXX
+#include "HapkitController.h"//XXX debug info
 
 
 //-----------------------------------------------------------------------------
@@ -49,10 +49,10 @@ IDirectSoundBuffer8 *OffRoadSoundBuffer;
 IDirectSoundBuffer8 *EngineSoundBuffers[8];
 
 IDirect3DTexture9 *g_pRoadTexture[NUM_ROAD_TEXTURES];
-long amount;//XXX
+long amount;//XXX debug info
 extern double force;//XXX debug info
 extern char* pstr;//XXX debug info
-extern HapkitController P1Hapkit;
+extern HapkitController P1Hapkit;//XXX debug info
 
 
 static long frameGap = DEFAULT_FRAME_GAP;

@@ -72,10 +72,8 @@ DWORD WINAPI HapkitController::updateValues(void*) {
 				fprintf(out, "Error Reading from serial port.\n");
 #endif
 			}
-//			Sleep(1);//FIXME needed to prevent crash?
 		} while (dwBytes == 1 && n < 99 && buff[n++] != '\n');
 		buff[n-1] = '\0';
-//		printf("buff: '%s'\n", (char*)buff);//XXX
 		if (n > 0 && dwBytes > 0) {
 			char* ptr = (char*)buff; // pointer for strtok
 			if ((ptr = strtok(ptr, " ")) != NULL) {
@@ -105,7 +103,7 @@ DWORD WINAPI HapkitController::updateValues(void*) {
 		strncpy((char*)buff+n, valString, strlen(valString));
 		n += strlen(valString) + 1;
 		buff[n-1] = '\n';
-		force = fbCentrifugalAcc;//XXX
+		force = fbCentrifugalAcc;//XXX debug info
 //		fbCentrifugalAcc = 0;//FIXME not implemented properly
 //		fbSteeringAngle = 0;//FIXME not implemented properly
 
@@ -140,14 +138,11 @@ DWORD WINAPI HapkitController::updateValues(void*) {
 			fbGrounded = false;
 		}
 		buff[n+1] = '\0';
-		if (n>0){//XXX
 		if(!WriteFile(device, &buff, n, &dwBytes, NULL) || dwBytes <= 0) {
 #if defined(DEBUG) || defined(_DEBUG) || defined(_DEBUG_CONSOLE)
 			fprintf(out, "Error Writing to serial port.\n");
 #endif
 		}
-			fprintf(stdout, "COM (%d|%d): '%s'\n", n, dwBytes, (char*)buff);//XXX
-		}//XXX
 	}
 	return 0; // TODO. error state
 

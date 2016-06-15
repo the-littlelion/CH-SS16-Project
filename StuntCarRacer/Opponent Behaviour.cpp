@@ -314,7 +314,7 @@ static void ResetOpponent (void)
 extern bool bNewGame;
 extern long TrackID;
 extern TRACK_PIECE Track[MAX_PIECES_PER_TRACK];
-extern long Track_Map[NUM_TRACK_CUBES][NUM_TRACK_CUBES];	// [x][z]
+//extern long Track_Map[NUM_TRACK_CUBES][NUM_TRACK_CUBES];	// [x][z] (outcommented for now, because unused)
 extern long NumTrackPieces;
 extern long PlayersStartPiece;
 
