@@ -865,6 +865,7 @@ static void CarControl (DWORD input)
 			if(controller.forward)
 			{
 				accelerate = TRUE;
+				boost = TRUE;//XXX paddle without fire button
 			}
 
 			if(controller.fire)
@@ -876,6 +877,7 @@ static void CarControl (DWORD input)
 			{
 				brake = TRUE;	// select brake
 				accelerate = FALSE;
+				boost = TRUE;//XXX paddle without fire button
 			}
 
 			//FIXME edit this part to paddle position
@@ -887,6 +889,20 @@ static void CarControl (DWORD input)
 			{
 				right = TRUE;
 			}
+			if( abs(controller.paddlePos) > HAPKIT_CENTER_DEADZONE )
+			{
+				(controller.paddlePos > 0) ? (left = TRUE) : (right = TRUE);
+//				static int pwm_val = 0;
+//				static const int max_paddle_val = 350;
+//				if (controller.paddlePos > max_paddle_val/5*pwm_val) {
+//					left = TRUE;
+//				} else if (controller.paddlePos < -max_paddle_val/5*pwm_val) {
+//					right = TRUE;
+//				}
+//				++pwm_val;
+//				pwm_val %= 5;
+			}
+
 		}
 
 	}
@@ -2700,11 +2716,13 @@ static void CalculateSteering (void)
 				{
 				// steering into the bend
 				steering_amount = section_steering_amount + 45;
+//				steering_amount = section_steering_amount - (P1Hapkit.getState().paddlePos/5);//XXX test
 				}
 			else
 				{
 				// steering away from bend
 				steering_amount = section_steering_amount - 35;
+//				steering_amount = section_steering_amount - (P1Hapkit.getState().paddlePos/5);//XXX test
 
 				// NOTE: left_right_value below just used as +'ve/-'ve flag
 				if (left_hand_bend)
@@ -2759,7 +2777,8 @@ static void CalculateSteering (void)
 			CalculateSteeringAcceleration(steering_amount);
 			}
 		}
-	amount = (section_steering_amount - 32) * (left_hand_bend ? -1 : 1);//XXX
+	P1Hapkit.feedbackSteeringAngle((long)((double)(player_z_angle > 32768 ? player_z_angle-65536 : player_z_angle)/18.2044));
+	amount = (long)((double)(player_z_angle > 32768 ? player_z_angle-65536 : player_z_angle)/18.2044);//(section_steering_amount - 32) * (left_hand_bend ? -1 : 1);//XXX debug info
 	return;
 	}
 

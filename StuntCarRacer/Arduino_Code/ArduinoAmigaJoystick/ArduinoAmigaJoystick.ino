@@ -7,6 +7,9 @@
     DECLARATION
 */
 
+// uncomment this define to enable amiga analog joystick support
+#define USE_ANALOG_JOYSTICK
+
 // Pin
 int pwmPin = 5; // PWM output pin for motor
 int dirPin = 8; // direction output pin for motor
@@ -17,6 +20,9 @@ int joyBackPin = 10;
 int joyLeftPin = 11;
 int joyRightPin = 12;
 int joyFirePin = 13;
+int analogXPin = A0;
+int analogYPin = A1;
+int analogXCenter, analogYCenter; // store neutral position at startup
 
 //// position tracking
 //
@@ -73,6 +79,12 @@ void setup() {
   // Initialize motor
   analogWrite(pwmPin, 0);     // set to not be spinning (0/255)
   digitalWrite(dirPin, LOW);  // set direction
+
+  // initialize analog joystick
+#ifdef USE_ANALOG_JOYSTICK
+  analogXCenter = analogRead(analogXPin);
+  analogYCenter = analogRead(analogYPin);
+#endif
 
   // Initialize position valiables
 //  lastLastRawPos = analogRead(sensorPosPin);
@@ -159,7 +171,14 @@ void loop() {
   if(millis() > nextcall) {
     nextcall += 50;
 
-	Serial.println(readJoystick()); // return joystick state
+	Serial.print(readJoystick()); // return joystick state
+#ifdef USE_ANALOG_JOYSTICK
+    Serial.print(" ");
+    Serial.print(analogRead(analogXPin)-analogXCenter);
+    Serial.print(" ");
+    Serial.print(analogRead(analogYPin)-analogYCenter);
+#endif
+    Serial.println();
   }
   
 }

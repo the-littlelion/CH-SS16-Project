@@ -26,6 +26,7 @@ bool HapkitController::connected = false;
 hapkitState HapkitController::state = {0};
 
 long HapkitController::fbCentrifugalAcc = 0;
+long HapkitController::fbSteeringAngle = 0;
 bool HapkitController::fbHitCar = false;
 bool HapkitController::fbCreak = false;
 bool HapkitController::fbSmash = false;
@@ -48,7 +49,8 @@ hapkitState HapkitController::getState() {
 	return state;
 }
 
-double force;//XXX
+double force;//XXX debug info
+char* pstr;//XXX debug info
 DWORD WINAPI HapkitController::updateValues(void*) {
 	// bitmasks for the joystate structure
 #define BUTTON_FWD    1
@@ -62,36 +64,50 @@ DWORD WINAPI HapkitController::updateValues(void*) {
 	DWORD dwBytes;
 	while (!done) {
 		// read states
-		n = 10; // max length of string to read
-		if(!ReadFile(device, &buff, n, &dwBytes, NULL)){
+		n = 0; // max length of string to read
+		do {
+			if(!ReadFile(device, &buff[n], 1, &dwBytes, NULL)){
+				dwBytes = 0; // go sure to exit while if reading fails
 #if defined(DEBUG) || defined(_DEBUG) || defined(_DEBUG_CONSOLE)
-			fprintf(out, "Error Reading from serial port.\n");
+				fprintf(out, "Error Reading from serial port.\n");
 #endif
-		} else {
-			if (dwBytes > 0) {
-				char* ptr = (char*)buff; // pointer for strtok
-				ptr = strtok(ptr, " ");
+			}
+//			Sleep(1);//FIXME needed to prevent crash?
+		} while (dwBytes == 1 && n < 99 && buff[n++] != '\n');
+		buff[n-1] = '\0';
+//		printf("buff: '%s'\n", (char*)buff);//XXX
+		if (n > 0 && dwBytes > 0) {
+			char* ptr = (char*)buff; // pointer for strtok
+			if ((ptr = strtok(ptr, " ")) != NULL) {
 				int stateVal = atoi(ptr);
 				state.forward = stateVal & BUTTON_FWD;
 				state.back    = stateVal & BUTTON_BACK;
 				state.left    = stateVal & BUTTON_LEFT;
 				state.right   = stateVal & BUTTON_RIGHT;
 				state.fire    = stateVal & BUTTON_FIRE;
-				ptr = strtok(NULL, " ");
+			}
+			if ((ptr = strtok(NULL, " ")) != NULL) {
 				state.paddlePos = atof(ptr);
 			}
 		}
 		// write feedback
 		n = 0; // total length to write
+
+		// output (space separated values): 'Feedback <centrifugalAcc> <steeringAngle>\n'
 		char valString[20];
+		strncpy((char*)buff+n, "FB ", 3);
+		n += 3;
 		_itoa(fbCentrifugalAcc, valString, 10);
-		strncpy((char*)buff+n, "Centrifugal ", 12);
-		n += 12;
+		strncpy((char*)buff+n, valString, strlen(valString));
+		n += strlen(valString) + 1;
+		strncpy((char*)buff+n-1, " ", 1);
+		_itoa(fbSteeringAngle, valString, 10);
 		strncpy((char*)buff+n, valString, strlen(valString));
 		n += strlen(valString) + 1;
 		buff[n-1] = '\n';
 		force = fbCentrifugalAcc;//XXX
-		fbCentrifugalAcc = 0;//FIXME not implemented properly
+//		fbCentrifugalAcc = 0;//FIXME not implemented properly
+//		fbSteeringAngle = 0;//FIXME not implemented properly
 
 		if (fbHitCar) {//FIXME refactoring needed
 			strncpy((char*)buff+n, "HitCar\n", 7);
@@ -310,48 +326,56 @@ void HapkitController::feedbackCentrifugalAccel(long acceleration) {
 	//FIXME timeout
 	fbCentrifugalAcc = acceleration;
 #if defined(DEBUG) || defined(_DEBUG) || defined(_DEBUG_CONSOLE)
-	fprintf(out, "Centrifugal Acceleration %d\n", acceleration);//FIXME DEBUG
+	fprintf(out, "Centrifugal Acceleration %d\n", acceleration);
+#endif
+}
+
+void HapkitController::feedbackSteeringAngle(long angle) {
+	//FIXME timeout
+	fbSteeringAngle = angle;
+#if defined(DEBUG) || defined(_DEBUG) || defined(_DEBUG_CONSOLE)
+	fprintf(out, "Steering angle %.1f°\n", (double)angle/10);
 #endif
 }
 
 void HapkitController::feedbackHitCar() {
 	fbHitCar = true;
 #if defined(DEBUG) || defined(_DEBUG) || defined(_DEBUG_CONSOLE)
-	fprintf(out, "Hit Car\n");//FIXME DEBUG
+	fprintf(out, "Hit Car\n");
 #endif
 }
 
 void HapkitController::feedbackCreak() {
 	fbCreak = true;
 #if defined(DEBUG) || defined(_DEBUG) || defined(_DEBUG_CONSOLE)
-	fprintf(out, "Creak\n");//FIXME DEBUG
+	fprintf(out, "Creak\n");
 #endif
 }
 
 void HapkitController::feedbackSmash() {
 	fbSmash = true;
 #if defined(DEBUG) || defined(_DEBUG) || defined(_DEBUG_CONSOLE)
-	fprintf(out, "Smash\n");//FIXME DEBUG
+	fprintf(out, "Smash\n");
 #endif
 }
 
 void HapkitController::feedbackGrounded() {
 	fbGrounded = true;
 #if defined(DEBUG) || defined(_DEBUG) || defined(_DEBUG_CONSOLE)
-	fprintf(out, "Grounded\n");//FIXME DEBUG
+	fprintf(out, "Grounded\n");
 #endif
 }
 
 void HapkitController::feedbackWreck() {
 	fbWreck = true;
 #if defined(DEBUG) || defined(_DEBUG) || defined(_DEBUG_CONSOLE)
-	fprintf(out, "Wreck\n");//FIXME DEBUG
+	fprintf(out, "Wreck\n");
 #endif
 }
 
 void HapkitController::feedbackOffroad() {
 	fbOffroad = true;
 #if defined(DEBUG) || defined(_DEBUG) || defined(_DEBUG_CONSOLE)
-	fprintf(out, "Offroad\n");//FIXME DEBUG
+	fprintf(out, "Offroad\n");
 #endif
 }

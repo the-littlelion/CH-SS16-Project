@@ -13,7 +13,7 @@
 /**
  * Define the width of the dead zone between turning left and right.
  */
-#define HAPKIT_CENTER_DEADZONE 10 /*TODO adjust this value*/
+#define HAPKIT_CENTER_DEADZONE 5 /*TODO adjust this value*/
 #define HAPKIT_FEEDBACK_TIMEOUT 2000 /* after the feedback hasn't been updated for this time in ticks the feedback values are reset to default */
 
 /**
@@ -86,6 +86,12 @@ public:
 	void feedbackCentrifugalAccel(long acceleration);
 
 	/**
+	 * Setpoint for angle from the center position.
+	 * @param angle angle in tenths of degrees
+	 */
+	void feedbackSteeringAngle(long angle);
+
+	/**
 	 * Feedback request to a car to car collision event.
 	 */
 	void feedbackHitCar();
@@ -118,23 +124,24 @@ public:
 	void feedbackGrounded();
 
 private:
-    static DWORD dwThreadId;      ///< The ID of the helper thread.
-    static HANDLE updaterThread;  ///< The file handle of the helper thread.
-    static HANDLE mtx;            ///< Mutex to access the class in a thread safe mode.
-	static HANDLE device;         ///< File handle of the COM-Port.
-	static bool done;             ///< Termination flag for the helper thread.
+    static DWORD dwThreadId;       ///< The ID of the helper thread.
+    static HANDLE updaterThread;   ///< The file handle of the helper thread.
+    static HANDLE mtx;             ///< Mutex to access the class in a thread safe mode.
+	static HANDLE device;          ///< File handle of the COM-Port.
+	static bool done;              ///< Termination flag for the helper thread.
 
-	static bool connected;        ///< Device connection state.
-	static hapkitState state;     ///< State information of the hapkit device
+	static bool connected;         ///< Device connection state.
+	static hapkitState state;      ///< State information of the hapkit device
 
-	static long fbLastUpdate;     ///< Time in ticks, the last continuously sent feedback data were updated
-	static long fbCentrifugalAcc; ///< Request of force-feedback (sign = direction, value = force)
-	static bool fbHitCar;         ///< Trigger Hit Car event
-	static bool fbCreak;          ///< Trigger Creak event
-	static bool fbSmash;          ///< Trigger Smash event
-	static bool fbWreck;          ///< Trigger Wreck event
-	static bool fbOffroad;        ///< Trigger Off Road event
-	static bool fbGrounded;       ///< Trigger Grounded event
+	static long fbLastUpdate;      ///< Time in ticks, the last continuously sent feedback data were updated
+	static long fbCentrifugalAcc;  ///< Request of force-feedback (sign = direction, value = force)
+	static long fbSteeringAngle;   ///< Angle of paddle in tenths of degrees from center position.
+	static bool fbHitCar;          ///< Trigger Hit Car event
+	static bool fbCreak;           ///< Trigger Creak event
+	static bool fbSmash;           ///< Trigger Smash event
+	static bool fbWreck;           ///< Trigger Wreck event
+	static bool fbOffroad;         ///< Trigger Off Road event
+	static bool fbGrounded;        ///< Trigger Grounded event
 
 	/**
 	 * Counter to hold the number of object instances.
