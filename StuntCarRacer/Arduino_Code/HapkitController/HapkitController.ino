@@ -286,8 +286,8 @@ void serialEvent() {
   fbEvent += serialBuffer;
   //TODO the reading and decoding goes here
 
-  if (fbEvent.startsWith("Centrifugal")) {
-	force = atoi(fbEvent.substring(12).c_str());
+  if (fbEvent.startsWith("FB")) {
+	force = atoi(fbEvent.substring(3).c_str());
     //Serial.print("force: ");
     //Serial.println(force);
   } else if (fbEvent.startsWith("HitCar")) {

@@ -18,6 +18,7 @@
 #include "Car Behaviour.h"
 #include "Opponent Behaviour.h"
 #include "Wavefunctions.h"
+#include "HapkitController.h"//XXX debug info
 
 
 //-----------------------------------------------------------------------------
@@ -48,6 +49,10 @@ IDirectSoundBuffer8 *OffRoadSoundBuffer;
 IDirectSoundBuffer8 *EngineSoundBuffers[8];
 
 IDirect3DTexture9 *g_pRoadTexture[NUM_ROAD_TEXTURES];
+long amount;//XXX debug info
+extern double force;//XXX debug info
+extern char* pstr;//XXX debug info
+extern HapkitController P1Hapkit;//XXX debug info
 
 
 static long frameGap = DEFAULT_FRAME_GAP;
@@ -1190,8 +1195,18 @@ void RenderText( double fTime )
 			txtHelper.DrawFormattedTextLine( L"Lap: %s   Boost: %d", lapText, boostReserve );
 			txtHelper.DrawFormattedTextLine( L"Opponent Distance: %d", CalculateOpponentsDistance() );
 			txtHelper.SetInsertionPos( 280, pd3dsdBackBuffer->Height-15*2 );
-			txtHelper.DrawFormattedTextLine( L"Speed: %d", CalculateDisplaySpeed() );
-			txtHelper.DrawFormattedTextLine( L"Damage: %d", new_damage );
+//			txtHelper.DrawFormattedTextLine( L"Speed: %d", CalculateDisplaySpeed() );
+			txtHelper.DrawFormattedTextLine( L"Speed: %d, Amount: %d, Pos: %f(%+05d)", CalculateDisplaySpeed(),
+					amount, P1Hapkit.getState().paddlePos, (int)force);//XXX debug info
+//			txtHelper.DrawFormattedTextLine( L"Damage: %d", new_damage );
+			txtHelper.DrawFormattedTextLine( L"Damage: %d, %c%c%c%c%c, '%s'", new_damage,
+					P1Hapkit.getState().forward?'F':'-',
+					P1Hapkit.getState().back?'B':'-',
+					P1Hapkit.getState().left?'L':'-',
+					P1Hapkit.getState().right?'R':'-',
+					P1Hapkit.getState().fire?'*':'-',
+					pstr
+					);//XXX debug info
 			txtHelper.End();
 
 			if (raceFinished)
