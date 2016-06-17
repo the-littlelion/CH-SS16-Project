@@ -192,7 +192,7 @@ void readPosCount() {
 void calPosMeter()
 {
   double rh = 65.659;   //[mm]
-  double ts = -.0107 * updatedPos + 4.9513; // Compute the angle of the sector pulley (ts) in degrees based on updatedPos
+  double ts = -.0107 * updatedPos + 7.9513; // Compute the angle of the sector pulley (ts) in degrees based on updatedPos
   xh = rh * (ts * 3.14159 / 180); // Compute the position of the handle based on ts
   vh = -(.95 * .95) * lastLastVh + 2 * .95 * lastVh + (1 - .95) * (1 - .95) * (xh - lastXh) / .0001; // filtered velocity (2nd-order filter)
   lastXh = xh;
@@ -207,9 +207,9 @@ byte readJoystick() {
 	byte result = 0;
 	digitalRead(joyFwdPin) == LOW ? result += 1 : 0;
 	digitalRead(joyBackPin) == LOW ? result += 2 : 0;
-	digitalRead(joyLeftPin) == LOW ? result += 4 : 0;
-	digitalRead(joyRightPin) == LOW ? result += 8 : 0;
-	digitalRead(joyFirePin) == LOW ? result += 16 : 0;
+	(xh>2.0f) == LOW ? result += 4 : 0;
+	(xh<-2.0f) == LOW ? result += 8 : 0;
+	//digitalRead(joyFirePin) == LOW ? result += 16 : 0;
 	return result;
 }
 
@@ -256,7 +256,8 @@ void forceRendering(void) {
 */
 bool dir;
 uint32_t nextcall = 1000;
-uint32_t nextcall2 = 2000;
+const uint16_t intervalperiod = 50*64; // 100 milliseconds
+uint32_t nextcall2 = 1000;
 bool on_off = true;
 void loop() {
   // read the position in count
@@ -266,7 +267,12 @@ void loop() {
   if(millis()>nextcall)
     on_off = false;
   forceRendering();
-  
+
+    
+  if(millis() > nextcall2){
+    nextcall2 += intervalperiod;
+    Serial.println(readJoystick());
+  }
   on_off ? set_position = xh + sin(10.0f*2.0f*M_PI*millis()/64000.0f) : force = 0;
   motorControl();
   
