@@ -13,7 +13,7 @@
 /**
  * Define the width of the dead zone between turning left and right.
  */
-#define HAPKIT_CENTER_DEADZONE 5 /*TODO adjust this value*/
+#define HAPKIT_CENTER_DEADZONE 10 /*TODO adjust this value*/
 #define HAPKIT_FEEDBACK_TIMEOUT 2000 /* after the feedback hasn't been updated for this time in ticks the feedback values are reset to default */
 
 /**
@@ -132,6 +132,7 @@ private:
 
 	static bool connected;         ///< Device connection state.
 	static hapkitState state;      ///< State information of the hapkit device
+	static DWORD timer;            ///< Timeout for haptic feedback.
 
 	static long fbLastUpdate;      ///< Time in ticks, the last continuously sent feedback data were updated
 	static long fbCentrifugalAcc;  ///< Request of force-feedback (sign = direction, value = force)
@@ -177,6 +178,18 @@ private:
 	 * deleted the helper thread is terminated and the COM-port is closed.
 	 */
 	static void closeUpdateThread();
+
+	/**
+	 * Reset the timer for haptic feedback.
+	 */
+	static void resetFbTimer();
+
+	/**
+	 * Timeout occured? If yes, don't send feedback data.
+	 * @retval true if timeout
+	 * @retval false otherwise
+	 */
+	static bool isFbTimeout();
 };
 
 #endif /* HAPKITCONTROLLER_H_ */
