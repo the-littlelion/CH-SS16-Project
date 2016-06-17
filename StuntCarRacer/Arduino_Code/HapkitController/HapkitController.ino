@@ -207,8 +207,8 @@ byte readJoystick() {
 	byte result = 0;
 	digitalRead(joyFwdPin) == LOW ? result += 1 : 0;
 	digitalRead(joyBackPin) == LOW ? result += 2 : 0;
-	(xh>2.0f) == LOW ? result += 4 : 0;
-	(xh<-2.0f) == LOW ? result += 8 : 0;
+	//(xh>2.0f) == LOW ? result += 4 : 0;
+	//(xh<-2.0f) == LOW ? result += 8 : 0;
 	//digitalRead(joyFirePin) == LOW ? result += 16 : 0;
 	return result;
 }
@@ -255,9 +255,11 @@ void forceRendering(void) {
     Loop function
 */
 bool dir;
-uint32_t nextcall = 1000;
+uint32_t nextcall = 0;
 const uint16_t intervalperiod = 50*64; // 100 milliseconds
 uint32_t nextcall2 = 1000;
+float vibrationfrequency = 10.0f;
+float amplitude = 1.0f;
 bool on_off = true;
 void loop() {
   // read the position in count
@@ -271,9 +273,11 @@ void loop() {
     
   if(millis() > nextcall2){
     nextcall2 += intervalperiod;
-    Serial.println(readJoystick());
+    Serial.print(readJoystick());
+    Serial.print(" ");
+    Serial.println(xh);
   }
-  on_off ? set_position = xh + sin(10.0f*2.0f*M_PI*millis()/64000.0f) : force = 0;
+  on_off ? set_position = xh + amplitude * sin(vibrationfrequency*2.0f*M_PI*millis()/64000.0f) : force = 0;
   motorControl();
   
 }
@@ -299,10 +303,10 @@ void serialEvent() {
   } else if (fbEvent.startsWith("HitCar")) {
 	//TODO rendering
   } else if (fbEvent.startsWith("Creak")) {
-	static bool fb = false;
-	fb = !fb;
-	digitalWrite(feedbackLEDPin, fb);//XXX debug
-	//TODO rendering
+    vibrationfrequency = 100.0f;
+    nextcall = millis() + 500UL*64UL;
+    amplitude = 2.0f;
+    on_off = true;
   } else if (fbEvent.startsWith("Smash")) {
 	//TODO rendering
   } else if (fbEvent.startsWith("Wreck")) {
