@@ -51,7 +51,7 @@ IDirectSoundBuffer8 *EngineSoundBuffers[8];
 IDirect3DTexture9 *g_pRoadTexture[NUM_ROAD_TEXTURES];
 long amount;//XXX debug info
 extern double force;//XXX debug info
-extern char* pstr;//XXX debug info
+extern long pstr;//XXX debug info
 extern HapkitController P1Hapkit;//XXX debug info
 
 
@@ -1050,7 +1050,8 @@ static void HandleTrackMenu( CDXUTTextHelper &txtHelper )
 	// output instructions
 	const D3DSURFACE_DESC *pd3dsdBackBuffer = DXUTGetBackBufferSurfaceDesc();
 	txtHelper.SetInsertionPos( 2, pd3dsdBackBuffer->Height-15*8 );
-	txtHelper.DrawFormattedTextLine( L"Current track - %s.  Press 'S' to select, Escape to quit", (TrackID == NO_TRACK ? L"None" : GetTrackName(TrackID)));
+//	txtHelper.DrawFormattedTextLine( L"Current track - %s.  Press 'S' to select, Escape to quit", (TrackID == NO_TRACK ? L"None" : GetTrackName(TrackID)));
+	txtHelper.DrawFormattedTextLine( L"Current track - %s.  Press 'S' to select, Escape to quit, amt:%d, pstr:%d, game:%d", (TrackID == NO_TRACK ? L"None" : GetTrackName(TrackID)), force, pstr, engineSoundPlaying);//XXX debug info
 
 	if ((keyPress >= firstMenuOption) && (keyPress <= lastMenuOption))
 		{
@@ -1108,7 +1109,8 @@ static void HandleTrackPreview( CDXUTTextHelper &txtHelper )
 	txtHelper.DrawTextLine( L"Keyboard controls during game :-" );
 	txtHelper.DrawTextLine( L"  S = Steer left, D = Steer right, Enter = Accelerate, Space = Brake" );
 	txtHelper.DrawTextLine( L"  R = Point car in opposite direction, P = Pause, O = Unpause" );
-	txtHelper.DrawTextLine( L"  M = Back to track menu, Escape = Quit" );
+//	txtHelper.DrawTextLine( L"  M = Back to track menu, Escape = Quit" );
+	txtHelper.DrawFormattedTextLine( L"  M = Back to track menu, Escape = Quit, amt:%d, pstr:%d, Game:%d", force, pstr, engineSoundPlaying);//XXX debug info
 
 	if (keyPress == 'S')
 		{
@@ -1199,13 +1201,13 @@ void RenderText( double fTime )
 			txtHelper.DrawFormattedTextLine( L"Speed: %d, Amount: %d, Pos: %f(%+05d)", CalculateDisplaySpeed(),
 					amount, P1Hapkit.getState().paddlePos, (int)force);//XXX debug info
 //			txtHelper.DrawFormattedTextLine( L"Damage: %d", new_damage );
-			txtHelper.DrawFormattedTextLine( L"Damage: %d, %c%c%c%c%c, '%s'", new_damage,
+			txtHelper.DrawFormattedTextLine( L"Damage: %d, %c%c%c%c%c, '%d', Game:%d", new_damage,
 					P1Hapkit.getState().forward?'F':'-',
 					P1Hapkit.getState().back?'B':'-',
 					P1Hapkit.getState().left?'L':'-',
 					P1Hapkit.getState().right?'R':'-',
 					P1Hapkit.getState().fire?'*':'-',
-					pstr
+					pstr, engineSoundPlaying
 					);//XXX debug info
 			txtHelper.End();
 

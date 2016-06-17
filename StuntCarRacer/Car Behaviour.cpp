@@ -139,6 +139,7 @@ HapkitController P1Hapkit;
 bool debug_position = FALSE;
 #endif
 
+extern long engineSoundPlaying;// additionally used to determine
 extern IDirectSoundBuffer8 *WreckSoundBuffer;
 extern IDirectSoundBuffer8 *GroundedSoundBuffer;
 extern IDirectSoundBuffer8 *CreakSoundBuffer;
@@ -2780,8 +2781,12 @@ static void CalculateSteering (void)
 			CalculateSteeringAcceleration(steering_amount);
 			}
 		}
-	P1Hapkit.feedbackSteeringAngle((long)((double)(player_z_angle > 32768 ? player_z_angle-65536 : player_z_angle)/18.2044));
-	amount = (long)((double)(player_z_angle > 32768 ? player_z_angle-65536 : player_z_angle)/18.2044);//(section_steering_amount - 32) * (left_hand_bend ? -1 : 1);//XXX debug info
+	if (engineSoundPlaying) {
+		P1Hapkit.feedbackSteeringAngle((long)((double)(player_z_angle > 32768 ? player_z_angle-65536 : player_z_angle)/18.2044));
+	} else {
+		P1Hapkit.feedbackSteeringAngle(0);
+	}
+		amount = (long)((double)(player_z_angle > 32768 ? player_z_angle-65536 : player_z_angle)/18.2044);//(section_steering_amount - 32) * (left_hand_bend ? -1 : 1);//XXX debug info
 	return;
 	}
 
@@ -3211,7 +3216,7 @@ static void UpdatePlayersRotationSpeed (void)
 
 	// take rotation speed as measure for centrifugal acceleration
 	// apply it only if the wheels are touching the track
-	if ((touching_road) && (! on_chains))
+	if ((touching_road) && (! on_chains) && engineSoundPlaying)
 	{
 		P1Hapkit.feedbackCentrifugalAccel(player_y_rotation_speed);
 	}
@@ -3847,7 +3852,7 @@ int c;
 /*	Description:				*/
 /*	======================================================================================= */
 
-extern long engineSoundPlaying;
+// extern long engineSoundPlaying; // moved to top for usage with haptic feedback
 
 int enginePeriod = 198;
 int engineSoundIndex = -1;
