@@ -7,7 +7,7 @@
 char serialBuffer[BUFSIZE];
 
 // Pin
-int pwmPin = 5; // PWM output pin for motor
+int pwmPin = 5; // PWM output pin for motor PD5 OC0B
 int dirPin = 8; // direction output pin for motor
 int sensorPosPin = A2; // input pin for MR sensor
 // inputs for the joystick
@@ -34,6 +34,7 @@ int lastRawOffset = 0;
 const int flipThresh = 700;  // threshold to determine whether or not a flip over the 180 degree mark occurred
 boolean flipped = false;
 
+
 // Kinematics
 double xh = 0;         // position of the handle [m]
 double lastXh = 0;     //last x position of the handle
@@ -48,6 +49,7 @@ double force = 0;           // force at the handle
 double Tp = 0;              // torque of the motor pulley
 double duty = 0;            // duty cylce (between 0 and 255)
 unsigned int output = 0;    // output command to the motor
+float set_position = 0.0f;
 
 
 /*
@@ -58,9 +60,11 @@ void setup() {
   // Set up serial communication
   Serial.begin(57600);
 
+  // Set PWM frequency
+  setPwmFrequency(pwmPin, 1);
   // Input pins
-  pinMode(sensorPosPin, INPUT); // set MR sensor pin to be an input
-  // set joystick pins as input with pullup
+  pinMode(sensorPosPin, INPUT); // set MR sensor pin to be an
+  // set joystick pins as input with pullup 
   pinMode(joyFwdPin, INPUT_PULLUP);
   pinMode(joyBackPin, INPUT_PULLUP);
   pinMode(joyLeftPin, INPUT_PULLUP);
@@ -79,6 +83,67 @@ void setup() {
   // Initialize position valiables
   lastLastRawPos = analogRead(sensorPosPin);
   lastRawPos = analogRead(sensorPosPin);
+}
+
+/*
+   setPwmFrequency
+*/
+void setPwmFrequency(int pin, int divisor) {
+  byte mode;
+  if (pin == 5 || pin == 6 || pin == 9 || pin == 10) {
+    switch (divisor) {
+      case 1: mode = 0x01; break;
+      case 8: mode = 0x02; break;
+      case 64: mode = 0x03; break;
+      case 256: mode = 0x04; break;
+      case 1024: mode = 0x05; break;
+      default: return;
+    }
+    if (pin == 5 || pin == 6) {
+      TCCR0B = TCCR0B & 0b11111000 | mode;
+    } else {
+      TCCR1B = TCCR1B & 0b11111000 | mode;
+    }
+  } else if (pin == 3 || pin == 11) {
+    switch (divisor) {
+      case 1: mode = 0x01; break;
+      case 8: mode = 0x02; break;
+      case 32: mode = 0x03; break;
+      case 64: mode = 0x04; break;
+      case 128: mode = 0x05; break;
+      case 256: mode = 0x06; break;
+      case 1024: mode = 0x7; break;
+      default: return;
+    }
+    TCCR2B = TCCR2B & 0b11111000 | mode;
+  }
+}
+
+/*
+      Output to motor
+*/
+void motorControl()
+{
+
+  Tp = rp / rs * rh * force;  // Compute the require motor pulley torque (Tp) to generate that force
+  // Determine correct direction for motor torque
+  if (force < 0) {
+    digitalWrite(dirPin, HIGH);
+  } else {
+    digitalWrite(dirPin, LOW);
+  }
+
+  // Compute the duty cycle required to generate Tp (torque at the motor pulley)
+  duty = sqrt(abs(Tp) / 0.03);
+
+  // Make sure the duty cycle is between 0 and 100%
+  if (duty > 1) {
+    duty = 1;
+  } else if (duty < 0) {
+    duty = 0;
+  }
+  output = (int)(duty * 255);  // convert duty cycle to output signal
+  analogWrite(pwmPin, output); // output the signal
 }
 
 /*
@@ -148,26 +213,62 @@ byte readJoystick() {
 	return result;
 }
 
+
+/*
+    forceRendering()
+*/
+void forceRendering(void) {
+  static float last_time = 0.0f;
+  static float last_error = 0.0f;
+  static float I = 0.0f;
+
+  static float kP = 0.2f;
+  static float kI = 0.0f;
+  static float kD = 0.00004f;
+
+  const float MAX_DIFFERENCE = 0.0f;
+  const float LIMITPLUS = 1.0f;
+  const float LIMITMINUS = -1.0f;
+  const float MAX_FORCE_OUTPUT = 0.0f;
+  float actualForceUsed = 0.0f;
+
+  float error = set_position - xh;
+  float time_now = (float)micros() * 1e-6f;
+
+  float dt = time_now - last_time;
+  float P = error * kP;
+  I += error * kI * dt;
+
+  if ( I > LIMITPLUS)
+    I = LIMITPLUS;
+  else if ( I < LIMITMINUS)
+    I = LIMITMINUS;
+
+  float D = -vh * kD;
+
+  force = P + I + D;
+
+  last_time = time_now;
+}
+
 /*
     Loop function
 */
 bool dir;
-int32_t nextcall = 1000;
+uint32_t nextcall = 1000;
+uint32_t nextcall2 = 2000;
+bool on_off = true;
 void loop() {
   // read the position in count
   readPosCount();
   calPosMeter();
-
-  if(millis() > nextcall) {
-    nextcall += 200;
-    analogWrite(pwmPin, 100);
-    dir = !dir;
-    digitalWrite(dirPin, dir);
-	
-	Serial.print(readJoystick()); // return joystick state
-    Serial.print(" ");
-    Serial.println(xh);
-  }
+  
+  if(millis()>nextcall)
+    on_off = false;
+  forceRendering();
+  
+  on_off ? set_position = xh + sin(10.0f*2.0f*M_PI*millis()/64000.0f) : force = 0;
+  motorControl();
   
 }
 
