@@ -9,6 +9,14 @@
 #define HAPKITCONTROLLER_H_
 
 #include <Windows.h>
+#include <setupapi.h>
+#include <initguid.h>
+
+/**
+ * The device ID
+ */
+//TODO adjust ID's to the hapkit
+#define HAPKIT_DEVICE_ID TEXT("vid_2341&pid_0043")
 
 /**
  * Define the width of the dead zone between turning left and right.
@@ -17,15 +25,10 @@
 #define HAPKIT_FEEDBACK_TIMEOUT 2000 /* after the feedback hasn't been updated for this time in ticks the feedback values are reset to default */
 
 /**
- * single hard-coded device
- * TODO. do it in a generic way - some changes may be necessary to maintain multiple devices
- * TODO. create automatic detection.
+ * This is the GUID for the USB device class
+ * (A5DCBF10-6530-11D2-901F-00C04FB951ED)
  */
-#if (defined(UNICODE) || defined (_UNICODE))
-#define SERIAL_DEVICE L"\\\\.\\COM12"
-#else
-#define SERIAL_DEVICE "\\\\.\\COM12"
-#endif
+DEFINE_GUID(GUID_DEVINTERFACE_USB_DEVICE, 0xA5DCBF10L, 0x6530, 0x11D2, 0x90, 0x1F, 0x00, 0xC0, 0x4F, 0xB9, 0x51, 0xED);
 
 /**
  * container for all state values received from the hapkit
@@ -33,8 +36,8 @@
 typedef struct _hapkitState {
 	bool forward;
 	bool back;
-	bool left;//XXX remove direction?
-	bool right;//XXX remove direction?
+	bool left; // spare field for button
+	bool right; // spare field for button
 	bool fire;
 	double paddlePos;
 } hapkitState;
@@ -190,6 +193,16 @@ private:
 	 * @retval false otherwise
 	 */
 	static bool isFbTimeout();
+
+	/**
+	 * Retrieve the device path from VID and PID string.
+	 * @param deviceId The identifying string. It should look like this example: "vid_2341&pid_0043".
+	 * @param devicePath Pointer to the buffer for the device path.
+	 * @param pathLength length of the buffer including the trailing '\0' character
+	 * @retval true if the device has been found
+	 * @retval false otherwise
+	 */
+	static bool getDevicePath(const TCHAR* deviceId, TCHAR* devicePath, size_t pathLength);
 };
 
 #endif /* HAPKITCONTROLLER_H_ */

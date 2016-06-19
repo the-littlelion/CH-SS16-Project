@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <cstdlib>
+#include <tchar.h>
 #include "HapkitController.h"
 
 #if defined(DEBUG) || defined(_DEBUG)
@@ -108,35 +109,33 @@ DWORD WINAPI HapkitController::updateValues(void*) {
 			buff[n-1] = '\n';
 			force = fbCentrifugalAcc;//XXX debug info
 	//		pstr = fbSteeringAngle;//XXX debug info
-	//		fbCentrifugalAcc = 0;//FIXME not implemented properly
-	//		fbSteeringAngle = 0;//FIXME not implemented properly
 
-			if (fbHitCar) {//FIXME refactoring needed
+			if (fbHitCar) {
 				strncpy((char*)buff+n, "HitCar\n", 7);
 				n += 7;
 				fbHitCar = false;
 			}
-			if (fbCreak) {//FIXME refactoring needed
+			if (fbCreak) {
 				strncpy((char*)buff+n, "Creak\n", 6);
 				n += 6;
 				fbCreak = false;
 			}
-			if (fbSmash) {//FIXME refactoring needed
+			if (fbSmash) {
 				strncpy((char*)buff+n, "Smash\n", 6);
 				n += 6;
 				fbSmash = false;
 			}
-			if (fbWreck) {//FIXME refactoring needed
+			if (fbWreck) {
 				strncpy((char*)buff+n, "Wreck\n", 6);
 				n += 6;
 				fbWreck = false;
 			}
-			if (fbOffroad) {//FIXME refactoring needed
+			if (fbOffroad) {
 				strncpy((char*)buff+n, "Offroad\n", 8);
 				n += 8;
 				fbOffroad = false;
 			}
-			if (fbGrounded) {//FIXME refactoring needed
+			if (fbGrounded) {
 				strncpy((char*)buff+n, "Grounded\n", 9);
 				n += 9;
 				fbGrounded = false;
@@ -167,11 +166,7 @@ DWORD WINAPI HapkitController::updateValues(void*) {
  * This method is called each times an object instance is created.
  */
 void HapkitController::initUpdateThread() {
-#if (defined(UNICODE) || defined (_UNICODE))
-#define HAPKIT_THREAD_MUTEX_NAME L"Global\\hapkitMtx_0923857129789"
-#else
-#define HAPKIT_THREAD_MUTEX_NAME "Global\\hapkitMtx_0923857129789"
-#endif
+#define HAPKIT_THREAD_MUTEX_NAME TEXT("Global\\hapkitMtx_0923857129789")
 
 	bool err = false;
 	if(mtx == NULL) {
@@ -190,7 +185,9 @@ void HapkitController::initUpdateThread() {
         // The thread got ownership of the mutex
         case WAIT_OBJECT_0:
 			if (objectCounter(0) < 1) {
-				device = CreateFile(SERIAL_DEVICE, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+				TCHAR devPath[100];
+				if (getDevicePath(HAPKIT_DEVICE_ID, devPath, 100)) {
+				device = CreateFile(devPath, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 				if(device==INVALID_HANDLE_VALUE){
 					if(GetLastError()==ERROR_FILE_NOT_FOUND){
 #if defined(DEBUG) || defined(_DEBUG) || defined(_DEBUG_CONSOLE)
@@ -203,6 +200,11 @@ void HapkitController::initUpdateThread() {
 #endif
 					err = true;
 				}
+				} else {
+#if defined(DEBUG) || defined(_DEBUG) || defined(_DEBUG_CONSOLE)
+					fprintf(out, "Error: Device not found.\n");
+#endif
+				}
 				// Do some basic settings
 				DCB serialParams = { 0 };
 				serialParams.DCBlength = sizeof(serialParams);
@@ -213,7 +215,7 @@ void HapkitController::initUpdateThread() {
 #endif
 					err = true;
 				}
-				serialParams.BaudRate = CBR_57600;//CBR_9600;
+				serialParams.BaudRate = CBR_57600;
 				serialParams.ByteSize = 8;
 				serialParams.StopBits = ONESTOPBIT;
 				serialParams.fDtrControl = DTR_CONTROL_DISABLE;
@@ -374,6 +376,7 @@ void HapkitController::feedbackGrounded() {
 }
 
 void HapkitController::feedbackWreck() {
+	resetFbTimer();
 	fbWreck = true;
 #if defined(DEBUG) || defined(_DEBUG) || defined(_DEBUG_CONSOLE)
 	fprintf(out, "Wreck\n");
@@ -393,5 +396,85 @@ void HapkitController::resetFbTimer() {
 }
 
 bool HapkitController::isFbTimeout() {
-	return (GetTickCount() - timer > 5000) ? true : false;
+	return (GetTickCount() - timer > HAPKIT_FEEDBACK_TIMEOUT) ? true : false;
+}
+
+bool HapkitController::getDevicePath(const TCHAR* deviceId, TCHAR* devicePath, size_t pathLength) {
+	bool found = false;
+	HDEVINFO                         hDevInfo;
+	SP_DEVICE_INTERFACE_DATA         DevIntfData;
+	PSP_DEVICE_INTERFACE_DETAIL_DATA DevIntfDetailData;
+	SP_DEVINFO_DATA                  DevData;
+
+	DWORD dwSize, dwType, dwMemberIdx;
+	HKEY hKey;
+	BYTE lpData[1024];
+
+	// We will try to get device information set for all USB devices that have a
+	// device interface and are currently present on the system (plugged in).
+	hDevInfo = SetupDiGetClassDevs(
+		&GUID_DEVINTERFACE_USB_DEVICE, NULL, 0, DIGCF_DEVICEINTERFACE | DIGCF_PRESENT);
+
+	if (hDevInfo != INVALID_HANDLE_VALUE) {
+		// Prepare to enumerate all device interfaces for the device information
+		// set that we retrieved with SetupDiGetClassDevs(..)
+		DevIntfData.cbSize = sizeof(SP_DEVICE_INTERFACE_DATA);
+		dwMemberIdx = 0;
+
+		// Next, we will keep calling this SetupDiEnumDeviceInterfaces(..) until this
+		// function causes GetLastError() to return  ERROR_NO_MORE_ITEMS or the device
+		// has been found. With each call the dwMemberIdx value needs to be incremented
+		// to retrieve the next device interface information.
+
+		SetupDiEnumDeviceInterfaces(hDevInfo, NULL, &GUID_DEVINTERFACE_USB_DEVICE,
+			dwMemberIdx, &DevIntfData);
+
+		while(GetLastError() != ERROR_NO_MORE_ITEMS && ! found) {
+			// As a last step we will need to get some more details for each
+			// of device interface information we are able to retrieve. This
+			// device interface detail gives us the information we need to identify
+			// the device (VID/PID), and decide if it's useful to us. It will also
+			// provide a DEVINFO_DATA structure which we can use to know the serial
+			// port name for a virtual com port.
+
+			DevData.cbSize = sizeof(DevData);
+
+			// Get the required buffer size. Call SetupDiGetDeviceInterfaceDetail with
+			// a NULL DevIntfDetailData pointer, a DevIntfDetailDataSize
+			// of zero, and a valid RequiredSize variable. In response to such a call,
+			// this function returns the required buffer size at dwSize.
+
+			SetupDiGetDeviceInterfaceDetail(
+				  hDevInfo, &DevIntfData, NULL, 0, &dwSize, NULL);
+
+			// Allocate memory for the DeviceInterfaceDetail struct. Don't forget to
+			// deallocate it later!
+			DevIntfDetailData = (PSP_DEVICE_INTERFACE_DETAIL_DATA)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, dwSize);
+			DevIntfDetailData->cbSize = sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA);
+
+			if (SetupDiGetDeviceInterfaceDetail(hDevInfo, &DevIntfData,
+				DevIntfDetailData, dwSize, &dwSize, &DevData)) {
+				// Finally we can start checking if we've found a usable device,
+				// by inspecting the DevIntfDetailData->DevicePath variable.
+
+				if (NULL != _tcsstr(DevIntfDetailData->DevicePath, deviceId)) {
+					found = true;
+					// Copy only the portion of the devicePath, that fits into the buffer.
+					// Thus, opening the device will fail if the buffer is too small, but
+					// it won't cause a memory leak.
+					size_t len = lstrlen((TCHAR*)DevIntfDetailData->DevicePath)+1;
+					lstrcpyn((TCHAR*)devicePath, (TCHAR*)DevIntfDetailData->DevicePath,
+							pathLength < len ? pathLength : len);
+				}
+			}
+			// cleaning up allocated memory
+			HeapFree(GetProcessHeap(), 0UL, DevIntfDetailData);
+
+			// Continue looping
+			SetupDiEnumDeviceInterfaces(
+				hDevInfo, NULL, &GUID_DEVINTERFACE_USB_DEVICE, ++dwMemberIdx, &DevIntfData);
+		}
+		SetupDiDestroyDeviceInfoList(hDevInfo);
+	}
+	return found;
 }
