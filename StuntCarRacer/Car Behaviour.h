@@ -61,6 +61,7 @@ extern void UpdateDamage (void);
 
 extern void ResetLapData (long car);
 extern void UpdateLapData (void);
+bool calculateIfWrecked(void);
 
 #ifdef USE_AMIGA_RECORDING
 extern void RequestGameReplay (void);

@@ -47,8 +47,18 @@ HapkitController::~HapkitController() {
 bool HapkitController::isConnected() {
 	return connected;
 }
+
 hapkitState HapkitController::getState() {
 	return state;
+}
+
+double HapkitController::steeringAmount(bool ignoreDirection) {
+	long sign = state.paddlePos < 0 ? -1 : 1;
+	double value = state.paddlePos * sign - HAPKIT_CENTER_DEADZONE;
+	if (value < 0) value = 0;
+	if (state.right) return 1;
+	if (state.left) return (ignoreDirection ? 1 : -1);
+	return (ignoreDirection ? 1 : sign) * 1.5 * value / (HAPKIT_PADDLE_MAX_STEERING - HAPKIT_CENTER_DEADZONE);
 }
 
 double force;//XXX debug info

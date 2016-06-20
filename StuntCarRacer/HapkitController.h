@@ -21,8 +21,10 @@
 /**
  * Define the width of the dead zone between turning left and right.
  */
-#define HAPKIT_CENTER_DEADZONE 10 /*TODO adjust this value*/
-#define HAPKIT_FEEDBACK_TIMEOUT 2000 /* after the feedback hasn't been updated for this time in ticks the feedback values are reset to default */
+#define HAPKIT_PADDLE_MAX_STEERING 500 /*TODO adjust this value*/ /* the steering amount in end position of the paddle */
+#define HAPKIT_CENTER_DEADZONE (0.2 * (HAPKIT_PADDLE_MAX_STEERING)) /* deadband without steering if paddle in center position */
+#define HAPKIT_FEEDBACK_TIMEOUT 2000 /* after the feedback hasn't been updated for this time in ms the feedback values are reset to default */
+#define IF_HAPKIT_HAS_FIRE_BUTTON false /* change to 'true' if the hapkit comes with extra fire button */
 
 /**
  * This is the GUID for the USB device class
@@ -81,6 +83,13 @@ public:
 	 * @return all button states and the paddle position.
 	 */
 	hapkitState getState();
+
+	/**
+	 * Calculate steering amount normalized between 0 and 150%.
+	 * @param ignoreDirection if true return only positive values, otherwise use sign to discriminate left from right direction
+	 * @return the steering amount
+	 */
+	double steeringAmount(bool ignoreDirection);
 
 	/**
 	 * Require a force feedback to the centrifugal force caused by driving through a curve.

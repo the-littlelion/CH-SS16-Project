@@ -96,6 +96,10 @@ extern bool bTestKey;
 
 #define	OFF_TRACK_LIMIT	64		// count after which player is put back on track
 
+#define WRECKED_DAMAGE_LIMIT 254    /* the car will be wrecked if this value is reached */
+#define SMASHED_LIMIT 10            /* don't count smashes above this number */
+#define SMASHED_DAMAGE_REDUCTION 10 /* reduce the wrecked damage limit by this value times smashes */
+
 #define	WRECKED			(wreck_wheel_height_reduction != 0)
 #define	NOT_WRECKED		(wreck_wheel_height_reduction == 0)
 
@@ -119,6 +123,7 @@ long front_left_damage = 0,
 	 rear_damage = 0;
 long damaged = 0;
 long new_damage = 0;
+long smashed = 0; // added remaining damage after smashes like in the original amiga game
 
 long car_collision_x_acceleration,
 	 car_collision_y_acceleration,
@@ -536,7 +541,7 @@ void CarBehaviour (DWORD input,
 	    (bNewGame) ||
 		(ReplayRequested))
 		{
-		ResetPlayer();
+//		ResetPlayer();// commented out --> restores the original behavior of the amiga game
 
 		if (bNewGame || ReplayRequested)
 			{
@@ -869,7 +874,9 @@ static void CarControl (DWORD input)
 			if(controller.forward)
 			{
 				accelerate = TRUE;
-				boost = TRUE;//XXX paddle without fire button
+				if(!IF_HAPKIT_HAS_FIRE_BUTTON) {
+					boost = TRUE;
+				}
 			}
 
 			if(controller.fire)
@@ -881,7 +888,9 @@ static void CarControl (DWORD input)
 			{
 				brake = TRUE;	// select brake
 				accelerate = FALSE;
-				boost = TRUE;//XXX paddle without fire button
+				if(!IF_HAPKIT_HAS_FIRE_BUTTON) {
+					boost = TRUE;
+				}
 			}
 
 			//FIXME edit this part to paddle position
@@ -2608,6 +2617,7 @@ static void CalculateXAcceleration (void)
 static long y_angle_difference, difference_angle, pos_difference_angle;
 
 extern long amount;//XXX debug info
+extern double amount2;//XXX debug info
 static void CalculateSteering (void)
 	{
 	// basically affects player_y_angle
@@ -2627,7 +2637,7 @@ static void CalculateSteering (void)
 	player_current_piece = piece;
 
 	// get section steering amount
-	section_steering_amount = Track[piece].steeringAmount;
+	section_steering_amount = Track[piece].steeringAmount * P1Hapkit.steeringAmount(true);
 
 
 	// calculate car x/z position relative to the piece (and in same range)
@@ -2786,7 +2796,9 @@ static void CalculateSteering (void)
 	} else {
 		P1Hapkit.feedbackSteeringAngle(0);
 	}
-		amount = (long)((double)(player_z_angle > 32768 ? player_z_angle-65536 : player_z_angle)/18.2044);//(section_steering_amount - 32) * (left_hand_bend ? -1 : 1);//XXX debug info
+//	amount = (long)((double)(player_z_angle > 32768 ? player_z_angle-65536 : player_z_angle)/18.2044);//(section_steering_amount - 32) * (left_hand_bend ? -1 : 1);//XXX debug info
+	amount = section_steering_amount;//XXX
+	amount2 = P1Hapkit.steeringAmount(false);
 	return;
 	}
 
@@ -3745,7 +3757,7 @@ long CalculateDisplaySpeed (void)
 	speed = player_z_speed;
 	if (speed < 0) speed = 0;
 
-	speed = ((speed * 183) >> 15);
+	speed = ((speed * 300) >> 15); // changed factor from 183 to 300 --> get the same speed as displayed in the amiga game
 
 	return(speed);
 	}
@@ -4196,6 +4208,9 @@ void UpdateDamage (void)
 	// Play smash sound effect
 	//SmashSoundBuffer->SetCurrentPosition(0);
 	SmashSoundBuffer->Play(NULL,NULL,NULL);	// not looping
+	if (smashed < SMASHED_LIMIT) {
+		++smashed;
+	}
 	P1Hapkit.feedbackSmash();
 	return;
 
@@ -4222,13 +4237,13 @@ PlayCreakSound:
 
 extern long opponents_current_piece;	// use as opponents_road_section
 
-bool raceFinished, raceWon;
+bool raceFinished, raceWon, wrecked; //added wrecked --> like in the amiga game
 long lapNumber[NUM_CARS];
 static bool carOnFirstHalfOfLap[NUM_CARS] = {false, false};
 
 void ResetLapData (long car)
 {
-	raceFinished = raceWon = FALSE;
+	raceFinished = raceWon = wrecked = FALSE;
 	lapNumber[car] = 0;
 	carOnFirstHalfOfLap[car] = false;
 }
@@ -4256,23 +4271,40 @@ void UpdateLapData (void)
 //	VALUE2 = lapNumber[OPPONENT];
 //	VALUE3 = carOnFirstHalfOfLap[PLAYER] ? 1 : 0;
 
-	for (car = OPPONENT; car < NUM_CARS; car++)
+	if ((wrecked = calculateIfWrecked())) {
+		wreck_wheel_height_reduction = 0x200;
+		raceFinished = true;
+	}
+	else
 	{
-		if (!raceFinished)
+		for (car = OPPONENT; car < NUM_CARS; car++)
 		{
-			if (lapNumber[car] == LAP_THAT_FINISHES_RACE)
+			if (!raceFinished)
 			{
-				raceFinished = true;
+				if (lapNumber[car] == LAP_THAT_FINISHES_RACE)
+				{
+					raceFinished = true;
 
-				// frames to show message for = 44; about 5.64 seconds
+					// frames to show message for = 44; about 5.64 seconds
 
-				if (CalculateIfWinning(start_finish_piece) < 0)
-					raceWon = true;
-				else
-					raceWon = false;
+					if (CalculateIfWinning(start_finish_piece) < 0)
+						raceWon = true;
+					else
+						raceWon = false;
+				}
 			}
 		}
 	}
+}
+
+/**
+ * This function calculates if the player's car is wrecked
+ * @retval true if wrecked
+ * @retval false otherwise
+ */
+bool calculateIfWrecked(void) {
+	// added this function to get the possibility to wreck the car, as is in the amiga game
+	return new_damage > (WRECKED_DAMAGE_LIMIT - smashed * SMASHED_DAMAGE_REDUCTION);
 }
 
 #ifdef NOT_USED
