@@ -51,6 +51,13 @@ double duty = 0;            // duty cylce (between 0 and 255)
 unsigned int output = 0;    // output command to the motor
 float set_position = 0.0f;
 
+// custom vars
+uint32_t nextcall = 0;
+const uint16_t intervalperiod = 50*64; // 100 milliseconds
+uint32_t nextcall2 = 1000;
+float vibrationfrequency = 10.0f;
+float amplitude = 1.0f;
+bool on_off = true;
 
 /*
       Setup function - this function run once when reset button is pressed.
@@ -124,7 +131,8 @@ void setPwmFrequency(int pin, int divisor) {
 */
 void motorControl()
 {
-
+  if(abs(xh) > 35.0f);
+    force = 0.0f;
   Tp = rp / rs * rh * force;  // Compute the require motor pulley torque (Tp) to generate that force
   // Determine correct direction for motor torque
   if (force < 0) {
@@ -251,16 +259,17 @@ void forceRendering(void) {
   last_time = time_now;
 }
 
+void shake(int interval_ms,float frequency_hz, float strength)
+{
+    vibrationfrequency = frequency_hz;
+    nextcall = millis() + (uint32_t)interval_ms*64UL;
+    amplitude = strength;
+    on_off = true;
+}
+
 /*
     Loop function
 */
-bool dir;
-uint32_t nextcall = 0;
-const uint16_t intervalperiod = 50*64; // 100 milliseconds
-uint32_t nextcall2 = 1000;
-float vibrationfrequency = 10.0f;
-float amplitude = 1.0f;
-bool on_off = true;
 void loop() {
   // read the position in count
   readPosCount();
@@ -301,20 +310,17 @@ void serialEvent() {
     //Serial.print("force: ");
     //Serial.println(force);
   } else if (fbEvent.startsWith("HitCar")) {
-	//TODO rendering
+	shake(500, 100.0f, 2.0f);
   } else if (fbEvent.startsWith("Creak")) {
-    vibrationfrequency = 100.0f;
-    nextcall = millis() + 500UL*64UL;
-    amplitude = 2.0f;
-    on_off = true;
+    shake(500, 100.0f, 2.0f);
   } else if (fbEvent.startsWith("Smash")) {
-	//TODO rendering
+	shake(500, 100.0f, 2.0f);
   } else if (fbEvent.startsWith("Wreck")) {
-	//TODO rendering
+	shake(500, 200.0f, 2.0f);
   } else if (fbEvent.startsWith("Offroad")) {
-	//TODO rendering
+	shake(500, 50.0f, 2.0f);
   } else if (fbEvent.startsWith("Grounded")) {
-	//TODO rendering
+	shake(200, 500.0f, 4.0f);
   }
 }
 
