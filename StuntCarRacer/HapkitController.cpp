@@ -61,8 +61,6 @@ double HapkitController::steeringAmount(bool ignoreDirection) {
 	return (ignoreDirection ? 1 : sign) * 1.5 * value / (HAPKIT_PADDLE_MAX_STEERING - HAPKIT_CENTER_DEADZONE);
 }
 
-double force;//XXX debug info
-long pstr;//XXX debug info
 DWORD WINAPI HapkitController::updateValues(void*) {
 	// bitmasks for the joystate structure
 #define BUTTON_FWD    1
@@ -95,7 +93,6 @@ DWORD WINAPI HapkitController::updateValues(void*) {
 				state.left    = stateVal & BUTTON_LEFT;
 				state.right   = stateVal & BUTTON_RIGHT;
 				state.fire    = stateVal & BUTTON_FIRE;
-				pstr = stateVal;//XXX debug info
 			}
 			if ((ptr = strtok(NULL, " ")) != NULL) {
 				state.paddlePos = atof(ptr);
@@ -117,8 +114,6 @@ DWORD WINAPI HapkitController::updateValues(void*) {
 			strncpy((char*)buff+n, valString, strlen(valString));
 			n += strlen(valString) + 1;
 			buff[n-1] = '\n';
-			force = fbCentrifugalAcc;//XXX debug info
-	//		pstr = fbSteeringAngle;//XXX debug info
 
 			if (fbHitCar) {
 				strncpy((char*)buff+n, "HitCar\n", 7);
@@ -195,8 +190,12 @@ void HapkitController::initUpdateThread() {
         // The thread got ownership of the mutex
         case WAIT_OBJECT_0:
 			if (objectCounter(0) < 1) {
+				bool isDevPresent;
 				TCHAR devPath[100];
-				if (getDevicePath(HAPKIT_DEVICE_ID, devPath, 100)) {
+				// search for the hapkit, if not found search for alternative device
+				isDevPresent = getFTDIComPort(devPath, 100);
+				if (!isDevPresent) isDevPresent = getDevicePath(ALTERNATIVE_DEVICE_ID, devPath, 100);
+				if (isDevPresent) {
 				device = CreateFile(devPath, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 				if(device==INVALID_HANDLE_VALUE){
 					if(GetLastError()==ERROR_FILE_NOT_FOUND){
@@ -473,8 +472,9 @@ bool HapkitController::getDevicePath(const TCHAR* deviceId, TCHAR* devicePath, s
 					// Thus, opening the device will fail if the buffer is too small, but
 					// it won't cause a memory leak.
 					size_t len = lstrlen((TCHAR*)DevIntfDetailData->DevicePath)+1;
-					lstrcpyn((TCHAR*)devicePath, (TCHAR*)DevIntfDetailData->DevicePath,
-							pathLength < len ? pathLength : len);
+					len = pathLength < len ? pathLength : len;
+					lstrcpyn(devicePath, (TCHAR*)DevIntfDetailData->DevicePath, len);
+					devicePath[len] = '\0';
 				}
 			}
 			// cleaning up allocated memory
@@ -487,4 +487,45 @@ bool HapkitController::getDevicePath(const TCHAR* deviceId, TCHAR* devicePath, s
 		SetupDiDestroyDeviceInfoList(hDevInfo);
 	}
 	return found;
+}
+
+bool HapkitController::getFTDIComPort(TCHAR* devicePath, size_t pathLength) {
+	FT_HANDLE fthandle;
+	FT_STATUS res;
+	long portNumber;
+/* **********************************************************************
+// Source: FTDI example code
+// Find the com port that has been assigned to your device.
+/* **********************************************************************/
+
+	res = FT_Open(0, &fthandle);
+
+	if(res != FT_OK){
+		return false;
+	}
+
+	res = FT_GetComPortNumber(fthandle,&portNumber);
+
+	if(res != FT_OK){
+		return false;
+	}
+
+	FT_Close(fthandle);
+	if (portNumber < 1) {
+		return false;
+	}
+	lstrcpyn(devicePath, TEXT("\\\\.\\COM14"), pathLength > 15 ? pathLength : 15);
+	size_t n = 7;
+	int i;
+	TCHAR valString[10];
+	for (i = 0; i < 10 && portNumber > 0 && n < pathLength ; ++i) {
+        int rem = portNumber % 10;
+        valString[i] = rem + _T('0');
+        portNumber = portNumber/10;
+	}
+	for (i -= 1; i >= 0; --i) {
+		devicePath[n++] = valString[i];
+	}
+	devicePath[n] = '\0';
+	return true;
 }

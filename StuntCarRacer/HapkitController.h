@@ -11,18 +11,19 @@
 #include <Windows.h>
 #include <setupapi.h>
 #include <initguid.h>
+#include ".\Common\ftd2xx.h"
 
 /**
- * The device ID
+ * The device ID's
  */
-//TODO adjust ID's to the hapkit
-#define HAPKIT_DEVICE_ID TEXT("vid_2341&pid_0043")
+//#define HAPKIT_DEVICE_ID TEXT("vid_0403&pid_6001") /* the vendor- and device ID of the hapkit - unused because FTDI does it in it's own way */
+#define ALTERNATIVE_DEVICE_ID TEXT("vid_2341&pid_0043") /* alternative device: Arduino UNO with joystick */
 
 /**
  * Define the width of the dead zone between turning left and right.
  */
-#define HAPKIT_PADDLE_MAX_STEERING 500 /*TODO adjust this value*/ /* the steering amount in end position of the paddle */
-#define HAPKIT_CENTER_DEADZONE (0.2 * (HAPKIT_PADDLE_MAX_STEERING)) /* deadband without steering if paddle in center position */
+#define HAPKIT_PADDLE_MAX_STEERING 35 /* the steering amount in end position of the paddle */
+#define HAPKIT_CENTER_DEADZONE (0.15 * (HAPKIT_PADDLE_MAX_STEERING)) /* deadband without steering if paddle in center position */
 #define HAPKIT_FEEDBACK_TIMEOUT 2000 /* after the feedback hasn't been updated for this time in ms the feedback values are reset to default */
 #define IF_HAPKIT_HAS_FIRE_BUTTON false /* change to 'true' if the hapkit comes with extra fire button */
 
@@ -212,6 +213,15 @@ private:
 	 * @retval false otherwise
 	 */
 	static bool getDevicePath(const TCHAR* deviceId, TCHAR* devicePath, size_t pathLength);
+
+	/**
+	 * Detect the FTDI device by the port number.
+	 * @param devicePath Pointer to the buffer for the device path.
+	 * @param pathLength length of the buffer including the trailing '\0' character
+	 * @retval true if the device has been found
+	 * @retval false otherwise
+	 */
+	static bool HapkitController::getFTDIComPort(TCHAR* devicePath, size_t pathLength);
 };
 
 #endif /* HAPKITCONTROLLER_H_ */

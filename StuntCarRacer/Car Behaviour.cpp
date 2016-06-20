@@ -893,7 +893,6 @@ static void CarControl (DWORD input)
 				}
 			}
 
-			//FIXME edit this part to paddle position
 			if(controller.left)
 			{
 				left = TRUE;
@@ -905,15 +904,6 @@ static void CarControl (DWORD input)
 			if( abs(controller.paddlePos) > HAPKIT_CENTER_DEADZONE )
 			{
 				(controller.paddlePos > 0) ? (left = TRUE) : (right = TRUE);
-//				static int pwm_val = 0; //XXX tried to create analog input - didn't work
-//				static const int max_paddle_val = 350;
-//				if (controller.paddlePos > max_paddle_val/5*pwm_val) {
-//					left = TRUE;
-//				} else if (controller.paddlePos < -max_paddle_val/5*pwm_val) {
-//					right = TRUE;
-//				}
-//				++pwm_val;
-//				pwm_val %= 5;
 			}
 
 		}
@@ -2616,8 +2606,6 @@ static void CalculateXAcceleration (void)
 
 static long y_angle_difference, difference_angle, pos_difference_angle;
 
-extern long amount;//XXX debug info
-extern double amount2;//XXX debug info
 static void CalculateSteering (void)
 	{
 	// basically affects player_y_angle
@@ -2730,13 +2718,11 @@ static void CalculateSteering (void)
 				{
 				// steering into the bend
 				steering_amount = section_steering_amount + 45;
-//				steering_amount = section_steering_amount - (P1Hapkit.getState().paddlePos/5);//XXX test
 				}
 			else
 				{
 				// steering away from bend
 				steering_amount = section_steering_amount - 35;
-//				steering_amount = section_steering_amount - (P1Hapkit.getState().paddlePos/5);//XXX test
 
 				// NOTE: left_right_value below just used as +'ve/-'ve flag
 				if (left_hand_bend)
@@ -2796,9 +2782,6 @@ static void CalculateSteering (void)
 	} else {
 		P1Hapkit.feedbackSteeringAngle(0);
 	}
-//	amount = (long)((double)(player_z_angle > 32768 ? player_z_angle-65536 : player_z_angle)/18.2044);//(section_steering_amount - 32) * (left_hand_bend ? -1 : 1);//XXX debug info
-	amount = section_steering_amount;//XXX
-	amount2 = P1Hapkit.steeringAmount(false);
 	return;
 	}
 

@@ -18,7 +18,6 @@
 #include "Car Behaviour.h"
 #include "Opponent Behaviour.h"
 #include "Wavefunctions.h"
-#include "HapkitController.h"//XXX debug info
 
 
 //-----------------------------------------------------------------------------
@@ -49,12 +48,7 @@ IDirectSoundBuffer8 *OffRoadSoundBuffer;
 IDirectSoundBuffer8 *EngineSoundBuffers[8];
 
 IDirect3DTexture9 *g_pRoadTexture[NUM_ROAD_TEXTURES];
-long amount;//XXX debug info
-double amount2;//XXX debug info
-extern double force;//XXX debug info
-extern long pstr;//XXX debug info
 extern long smashed; // smashed state added - remaining damage like in the original amiga game
-extern HapkitController P1Hapkit;//XXX debug info
 
 
 static long frameGap = DEFAULT_FRAME_GAP;
@@ -1052,8 +1046,7 @@ static void HandleTrackMenu( CDXUTTextHelper &txtHelper )
 	// output instructions
 	const D3DSURFACE_DESC *pd3dsdBackBuffer = DXUTGetBackBufferSurfaceDesc();
 	txtHelper.SetInsertionPos( 2, pd3dsdBackBuffer->Height-15*8 );
-//	txtHelper.DrawFormattedTextLine( L"Current track - %s.  Press 'S' to select, Escape to quit", (TrackID == NO_TRACK ? L"None" : GetTrackName(TrackID)));
-	txtHelper.DrawFormattedTextLine( L"Current track - %s.  Press 'S' to select, Escape to quit, amt:%d, pstr:%d, game:%d (%d)", (TrackID == NO_TRACK ? L"None" : GetTrackName(TrackID)), force, pstr, engineSoundPlaying, GameMode);//XXX debug info
+	txtHelper.DrawFormattedTextLine( L"Current track - %s.  Press 'S' to select, Escape to quit", (TrackID == NO_TRACK ? L"None" : GetTrackName(TrackID)));
 
 	if ((keyPress >= firstMenuOption) && (keyPress <= lastMenuOption))
 		{
@@ -1111,8 +1104,7 @@ static void HandleTrackPreview( CDXUTTextHelper &txtHelper )
 	txtHelper.DrawTextLine( L"Keyboard controls during game :-" );
 	txtHelper.DrawTextLine( L"  S = Steer left, D = Steer right, Enter = Accelerate, Space = Brake" );
 	txtHelper.DrawTextLine( L"  R = Point car in opposite direction, P = Pause, O = Unpause" );
-//	txtHelper.DrawTextLine( L"  M = Back to track menu, Escape = Quit" );
-	txtHelper.DrawFormattedTextLine( L"  M = Back to track menu, Escape = Quit, amt:%d, pstr:%d, Game:%d (%d)", force, pstr, engineSoundPlaying, GameMode);//XXX debug info
+	txtHelper.DrawTextLine( L"  M = Back to track menu, Escape = Quit" );
 
 	if (keyPress == 'S')
 		{
@@ -1199,18 +1191,8 @@ void RenderText( double fTime )
 			txtHelper.DrawFormattedTextLine( L"Lap: %s   Boost: %d", lapText, boostReserve );
 			txtHelper.DrawFormattedTextLine( L"Opponent Distance: %d", CalculateOpponentsDistance() );
 			txtHelper.SetInsertionPos( 280, pd3dsdBackBuffer->Height-15*2 );
-//			txtHelper.DrawFormattedTextLine( L"Speed: %d", CalculateDisplaySpeed() );
-			txtHelper.DrawFormattedTextLine( L"Speed: %d, Amount: %d (pure: %f), Pos: %f(%+05d)", CalculateDisplaySpeed(),
-					amount, amount2, P1Hapkit.getState().paddlePos, (int)force);//XXX debug info
-//			txtHelper.DrawFormattedTextLine( L"Damage: %d", new_damage );
-			txtHelper.DrawFormattedTextLine( L"Damage: %d, Smashed: %d times, %c%c%c%c%c, '%d', Game:%d (%d)", new_damage, smashed,
-					P1Hapkit.getState().forward?'F':'-',
-					P1Hapkit.getState().back?'B':'-',
-					P1Hapkit.getState().left?'L':'-',
-					P1Hapkit.getState().right?'R':'-',
-					P1Hapkit.getState().fire?'*':'-',
-					pstr, engineSoundPlaying, GameMode
-					);//XXX debug info
+			txtHelper.DrawFormattedTextLine( L"Speed: %d", CalculateDisplaySpeed() );
+			txtHelper.DrawFormattedTextLine( L"Damage: %d, Smashed: %d times", new_damage, smashed);// added number of smashes
 			txtHelper.End();
 
 			if (raceFinished)
