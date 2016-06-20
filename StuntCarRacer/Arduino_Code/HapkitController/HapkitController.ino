@@ -46,11 +46,20 @@ double rs = 0.073152;   //[m]
 double rh = 0.065659;   //[m]
 // Force output variables
 double force = 0;           // force at the handle
+double force_vibrate = 0;
 double Tp = 0;              // torque of the motor pulley
 double duty = 0;            // duty cylce (between 0 and 255)
 unsigned int output = 0;    // output command to the motor
 float set_position = 0.0f;
 
+// custom vars
+uint32_t nextcall = 0;
+const uint16_t intervalperiod = 50*64; // 100 milliseconds
+uint32_t nextcall2 = 1000;
+float vibrationfrequency = 10.0f;
+float amplitude = 1.0f;
+bool on_off = true;
+float springfactor = 0.0f;
 
 /*
       Setup function - this function run once when reset button is pressed.
@@ -124,10 +133,11 @@ void setPwmFrequency(int pin, int divisor) {
 */
 void motorControl()
 {
-
-  Tp = rp / rs * rh * force;  // Compute the require motor pulley torque (Tp) to generate that force
+  if(abs(xh) > 35.0f)
+    force = 0.0f;
+  Tp = rp / rs * rh * (force + force_vibrate);  // Compute the require motor pulley torque (Tp) to generate that force
   // Determine correct direction for motor torque
-  if (force < 0) {
+  if ((force+force_vibrate) < 0) {
     digitalWrite(dirPin, HIGH);
   } else {
     digitalWrite(dirPin, LOW);
@@ -222,9 +232,10 @@ void forceRendering(void) {
   static float last_error = 0.0f;
   static float I = 0.0f;
 
-  static float kP = 0.2f;
+  const static float kP = 0.1f;
   static float kI = 0.0f;
-  static float kD = 0.00004f;
+  static float kD = 0.0f;//0.00004f;
+  float kP_scaled;
 
   const float MAX_DIFFERENCE = 0.0f;
   const float LIMITPLUS = 1.0f;
@@ -232,35 +243,28 @@ void forceRendering(void) {
   const float MAX_FORCE_OUTPUT = 0.0f;
   float actualForceUsed = 0.0f;
 
+  kP_scaled = kP * springfactor / 1000.0f;
+
   float error = set_position - xh;
-  float time_now = (float)micros() * 1e-6f;
 
-  float dt = time_now - last_time;
-  float P = error * kP;
-  I += error * kI * dt;
-
-  if ( I > LIMITPLUS)
-    I = LIMITPLUS;
-  else if ( I < LIMITMINUS)
-    I = LIMITMINUS;
+  float P = error * kP_scaled;
 
   float D = -vh * kD;
 
   force = P + I + D;
+}
 
-  last_time = time_now;
+void shake(int interval_ms,float frequency_hz, float strength)
+{
+    vibrationfrequency = frequency_hz;
+    nextcall = millis() + (uint32_t)interval_ms * 64UL;
+    amplitude = strength;
+    on_off = true;
 }
 
 /*
     Loop function
 */
-bool dir;
-uint32_t nextcall = 0;
-const uint16_t intervalperiod = 50*64; // 100 milliseconds
-uint32_t nextcall2 = 1000;
-float vibrationfrequency = 10.0f;
-float amplitude = 1.0f;
-bool on_off = true;
 void loop() {
   // read the position in count
   readPosCount();
@@ -277,9 +281,12 @@ void loop() {
     Serial.print(" ");
     Serial.println(xh);
   }
-  on_off ? set_position = xh + amplitude * sin(vibrationfrequency*2.0f*M_PI*millis()/64000.0f) : force = 0;
-  motorControl();
+
+
+  // calculations for haptic event feedback
+  on_off ? force_vibrate = amplitude * sin(vibrationfrequency*2.0f*M_PI*millis()/64000.0f) : force_vibrate = 0;
   
+  motorControl();
 }
 
 /*
@@ -297,24 +304,21 @@ void serialEvent() {
   //TODO the reading and decoding goes here
 
   if (fbEvent.startsWith("FB")) {
-	force = atoi(fbEvent.substring(3).c_str());
+	springfactor = atof(fbEvent.substring(3).c_str()); // roughly from 0 to 1000
     //Serial.print("force: ");
     //Serial.println(force);
   } else if (fbEvent.startsWith("HitCar")) {
-	//TODO rendering
+	shake(500, 100.0f, 0.1f);
   } else if (fbEvent.startsWith("Creak")) {
-    vibrationfrequency = 100.0f;
-    nextcall = millis() + 500UL*64UL;
-    amplitude = 2.0f;
-    on_off = true;
+    shake(500, 100.0f, 0.1f);
   } else if (fbEvent.startsWith("Smash")) {
-	//TODO rendering
+	shake(500, 100.0f, 0.5f);
   } else if (fbEvent.startsWith("Wreck")) {
-	//TODO rendering
+	shake(500, 200.0f, 0.1f);
   } else if (fbEvent.startsWith("Offroad")) {
-	//TODO rendering
+	shake(500, 20.0f, 0.1f);
   } else if (fbEvent.startsWith("Grounded")) {
-	//TODO rendering
+	shake(200, 10.0f, 0.1f);
   }
 }
 
