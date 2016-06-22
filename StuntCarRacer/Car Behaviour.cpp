@@ -2626,7 +2626,7 @@ static void CalculateSteering (void)
 
 	// get section steering amount
 	section_steering_amount = Track[piece].steeringAmount *
-			(P1Hapkit.isConnected()) ? P1Hapkit.steeringAmount(true) : 1.0;
+			((P1Hapkit.isConnected()) ? P1Hapkit.steeringAmount(true) : 1.0);
 
 
 	// calculate car x/z position relative to the piece (and in same range)
