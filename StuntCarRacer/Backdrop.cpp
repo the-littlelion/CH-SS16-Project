@@ -169,7 +169,8 @@ static void DrawHorizon( long viewpoint_y,
 		trans_y = (x * sin_z) + (y * cos_z);
 
 		// perspective projection
-		z = trans_z >> LOG_FOCUS;
+//		z = trans_z >> LOG_FOCUS;
+		z = (long)(trans_z / (screen_height*512.f / 480.f));
 
 		// debug stuff
 		if (z == 0)
@@ -854,7 +855,8 @@ static void DrawScenery( long viewpoint_y,
 			// viewing pyramid, although the saving would probably be negligible
 
 			// perspective projection
-			z = trans_z >> LOG_FOCUS;
+//			z = trans_z >> LOG_FOCUS;
+			z = (long)(trans_z / (screen_height*512.f / 480.f));
 
 			// debug stuff
 			if (z == 0)
