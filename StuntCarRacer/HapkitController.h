@@ -23,7 +23,7 @@
  * Define the width of the dead zone between turning left and right.
  */
 #define HAPKIT_PADDLE_MAX_STEERING 35 /* the steering amount in end position of the paddle */
-#define HAPKIT_CENTER_DEADZONE (0.15 * (HAPKIT_PADDLE_MAX_STEERING)) /* deadband without steering if paddle in center position */
+#define HAPKIT_CENTER_DEADZONE (0.10 * (HAPKIT_PADDLE_MAX_STEERING)) /* deadband without steering if paddle in center position */
 #define HAPKIT_FEEDBACK_TIMEOUT 2000 /* after the feedback hasn't been updated for this time in ms the feedback values are reset to default */
 #define IF_HAPKIT_HAS_FIRE_BUTTON false /* change to 'true' if the hapkit comes with extra fire button */
 

@@ -243,7 +243,7 @@ void forceRendering(void) {
   const float MAX_FORCE_OUTPUT = 0.0f;
   float actualForceUsed = 0.0f;
 
-  kP_scaled = kP * springfactor / 1000.0f;
+  kP_scaled = kP * abs(springfactor) / 1000.0f;
 
   float error = set_position - xh;
 
@@ -308,17 +308,17 @@ void serialEvent() {
     //Serial.print("force: ");
     //Serial.println(force);
   } else if (fbEvent.startsWith("HitCar")) {
-	shake(500, 100.0f, 0.1f);
+	shake(1000, 100.0f, 0.5f);
   } else if (fbEvent.startsWith("Creak")) {
-    shake(500, 100.0f, 0.1f);
+    shake(500, 100.0f, 0.4f);
   } else if (fbEvent.startsWith("Smash")) {
-	shake(500, 100.0f, 0.5f);
+	shake(1200, 100.0f, 1.5f);
   } else if (fbEvent.startsWith("Wreck")) {
-	shake(500, 200.0f, 0.1f);
+	shake(700, 200.0f, 0.8f);
   } else if (fbEvent.startsWith("Offroad")) {
-	shake(500, 20.0f, 0.1f);
+	shake(1000, 20.0f, 0.5f);
   } else if (fbEvent.startsWith("Grounded")) {
-	shake(200, 10.0f, 0.1f);
+	shake(300, 10.0f, 0.3f);
   }
 }
 
