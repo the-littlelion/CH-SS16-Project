@@ -20,8 +20,8 @@
 								<option id="org.eclipse.cdt.msvc.cl.option.debugFormat.1604732001" name="Debug Information Format" superClass="org.eclipse.cdt.msvc.cl.option.debugFormat" value="org.eclipse.cdt.msvc.cl.option.debugFormat.complete" valueType="enumerated"/>
 								<option id="org.eclipse.cdt.msvc.cl.option.includes.2126217700" name="Include Path (/I)" superClass="org.eclipse.cdt.msvc.cl.option.includes" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;C:\WinDDK\7600.16385.1\inc\atl71&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}}\Common&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DXSDK_DIR}\Include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Common}&quot;"/>
 								</option>
 								<option id="org.eclipse.cdt.msvc.cl.option.macros.725954136" name="Defines (/D)" superClass="org.eclipse.cdt.msvc.cl.option.macros" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="UNICODE=1"/>
@@ -39,8 +39,8 @@
 								</option>
 								<option id="org.eclipse.cdt.msvc.cl.option.includes.194671392" name="Include Path (/I)" superClass="org.eclipse.cdt.msvc.cl.option.includes" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;C:\WinDDK\7600.16385.1\inc\atl71&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}}\Common&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DXSDK_DIR}\Include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Common}&quot;"/>
 								</option>
 								<inputType id="org.eclipse.cdt.msvc.cl.inputType.704587006" superClass="org.eclipse.cdt.msvc.cl.inputType"/>
 							</tool>
@@ -78,14 +78,6 @@
 							<tool id="org.eclipse.cdt.msvc.lib.832254278" name="Library Manager (lib)" superClass="org.eclipse.cdt.msvc.lib"/>
 						</toolChain>
 					</folderInfo>
-					<fileInfo id="org.eclipse.cdt.msvc.exe.debug.2031981095.1043505017" name="StuntCarRacer.cpp" rcbsApplicability="disable" resourcePath="StuntCarRacer.cpp" toolsToInvoke="org.eclipse.cdt.msvc.cl.exe.debug.1366741503.1956017079">
-						<tool id="org.eclipse.cdt.msvc.cl.exe.debug.1366741503.1956017079" name="C++ Compiler (cl)" superClass="org.eclipse.cdt.msvc.cl.exe.debug.1366741503">
-							<option id="org.eclipse.cdt.msvc.cl.option.includes.1257565973" name="Include Path (/I)" superClass="org.eclipse.cdt.msvc.cl.option.includes" valueType="includePath">
-								<listOptionValue builtIn="false" value="&quot;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include&quot;"/>
-							</option>
-							<inputType id="org.eclipse.cdt.msvc.cl.inputType.246836753" superClass="org.eclipse.cdt.msvc.cl.inputType"/>
-						</tool>
-					</fileInfo>
 					<sourceEntries>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
@@ -112,8 +104,8 @@
 								<option id="org.eclipse.cdt.msvc.cl.option.debugFormat.1385769471" name="Debug Information Format" superClass="org.eclipse.cdt.msvc.cl.option.debugFormat"/>
 								<option id="org.eclipse.cdt.msvc.cl.option.includes.1939362107" name="Include Path (/I)" superClass="org.eclipse.cdt.msvc.cl.option.includes" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;C:\WinDDK\7600.16385.1\inc\atl71&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Common}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DXSDK_DIR}\Include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}\Common}&quot;"/>
 								</option>
 								<option id="org.eclipse.cdt.msvc.cl.option.macros.1347308290" name="Defines (/D)" superClass="org.eclipse.cdt.msvc.cl.option.macros" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="UNICODE=1"/>
@@ -130,8 +122,8 @@
 								</option>
 								<option id="org.eclipse.cdt.msvc.cl.option.includes.1059368501" name="Include Path (/I)" superClass="org.eclipse.cdt.msvc.cl.option.includes" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;C:\WinDDK\7600.16385.1\inc\atl71&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include&quot;"/>
-									<listOptionValue builtIn="false" value="${workspace_loc:/${ProjName}/Common}"/>
+									<listOptionValue builtIn="false" value="&quot;${DXSDK_DIR}\Include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}\Common}&quot;"/>
 								</option>
 								<inputType id="org.eclipse.cdt.msvc.cl.inputType.1995160871" superClass="org.eclipse.cdt.msvc.cl.inputType"/>
 							</tool>
@@ -167,14 +159,6 @@
 							<tool id="org.eclipse.cdt.msvc.lib.2091519773" name="Library Manager (lib)" superClass="org.eclipse.cdt.msvc.lib"/>
 						</toolChain>
 					</folderInfo>
-					<fileInfo id="org.eclipse.cdt.msvc.exe.release.2107466763.1138953662" name="StuntCarRacer.cpp" rcbsApplicability="disable" resourcePath="StuntCarRacer.cpp" toolsToInvoke="org.eclipse.cdt.msvc.cl.exe.release.1933854657.2027920061">
-						<tool errorParsers="org.eclipse.cdt.core.VCErrorParser" id="org.eclipse.cdt.msvc.cl.exe.release.1933854657.2027920061" name="C++ Compiler (cl)" superClass="org.eclipse.cdt.msvc.cl.exe.release.1933854657">
-							<option id="org.eclipse.cdt.msvc.cl.option.includes.166794218" name="Include Path (/I)" superClass="org.eclipse.cdt.msvc.cl.option.includes" valueType="includePath">
-								<listOptionValue builtIn="false" value="&quot;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include&quot;"/>
-							</option>
-							<inputType id="org.eclipse.cdt.msvc.cl.inputType.1227965453" superClass="org.eclipse.cdt.msvc.cl.inputType"/>
-						</tool>
-					</fileInfo>
 					<sourceEntries>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
@@ -216,4 +200,5 @@
 			<resource resourceType="PROJECT" workspacePath="/StuntCarRacer"/>
 		</configuration>
 	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 </cproject>

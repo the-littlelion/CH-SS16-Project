@@ -11,7 +11,7 @@
 #include <Windows.h>
 #include <setupapi.h>
 #include <initguid.h>
-#include ".\Common\ftd2xx.h"
+#include "ftd2xx.h"
 
 /**
  * The device ID's
