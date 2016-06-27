@@ -29,6 +29,7 @@
 		THE LOGIC WOULD THEN USE THIS VALUE RATHER THAN JUST ADDING OR
 		SUBTRACTING 1.
 
+    EDITED (theoneone): added support for haptic device.
  **************************************************************************/
 
 /*

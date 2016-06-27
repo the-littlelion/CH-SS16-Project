@@ -2,7 +2,7 @@
  * HapkitController.h
  *
  *  Created on: 08. Juni 2016
- *      Author: root (Gerhard Aigner)
+ *      Author: theoneone (Gerhard Aigner)
  */
 
 #ifndef HAPKITCONTROLLER_H_

@@ -2,7 +2,7 @@
  * JoyArduinoHandler.cpp
  *
  *  Created on: 05. Juni 2016
- *      Author: root
+ *      Author: theoneone
  */
 
 #include <iostream>

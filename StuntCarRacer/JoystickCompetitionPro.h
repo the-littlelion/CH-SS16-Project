@@ -2,7 +2,7 @@
  * JoyArduinoHandler.h
  *
  *  Created on: 05. Juni 2016
- *      Author: root
+ *      Author: theoneone
  */
 
 #ifndef JOYSTICKCOMPETITIONPRO_H_

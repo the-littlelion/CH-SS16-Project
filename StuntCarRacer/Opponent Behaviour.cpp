@@ -3,7 +3,9 @@
   Opponent Behaviour.cpp - Functions relating to opponents's car behaviour
 
  **************************************************************************/
-
+/*
+ *     EDITED (theoneone): added support for haptic device (feedback channel).
+ */
 
 /*	============= */
 /*	Include files */

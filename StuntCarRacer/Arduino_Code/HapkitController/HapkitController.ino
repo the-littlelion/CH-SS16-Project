@@ -1,3 +1,9 @@
+/*
+ * HapkitController.ino
+ *
+ *  Created on: 08. Juni 2016
+ *      Author: luggi, stefha
+ */
 #include <math.h>
 
 /*

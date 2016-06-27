@@ -2,7 +2,7 @@
  * HapkitController.cpp
  *
  *  Created on: 08. Juni 2016
- *      Author: root
+ *      Author: theoneone
  */
 
 #include <iostream>
