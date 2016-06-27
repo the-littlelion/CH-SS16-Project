@@ -48,10 +48,10 @@ fails and reinstall them afterwards.
 This Project is multi-licensed.
 * The code of the game is forked from sourceforge.net (see. the link above). It is BSD-licensed and belongs to Daniel Vernon and Andrew Copland.
 
-* The DXUT-libraries are copyrighted by Microsoft. It is available under the MIT license at https://github.com/Microsoft/DXUT
+* The DXUT-libraries are copyrighted by Microsoft. They are available under the MIT license at https://github.com/Microsoft/DXUT
 
 * The ftd2xx library is copyrighted by FTTI and is freely available at http://www.ftdichip.com/Support/SoftwareExamples/CodeExamples.htm
 
 * The code for the hapkit device is a derivative work of the example code provided by the Stanford University (see the link above) under the terms of the "Creative Commons Attribution-ShareAlike 3.0 Unported License"
 
-We chose the BSD license for our supplements, because the original work is licensed under the same terms. Unfortunately it comes AS IS and without ANY warranty, see the LICENSE file for details.
+We chose the BSD license for our supplements, because the original work is licensed under the same terms. Unfortunately the code comes AS IS and without ANY warranty, see the LICENSE file for details.
